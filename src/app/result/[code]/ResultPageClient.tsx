@@ -22,6 +22,7 @@ import {
 type ResultPageClientProps = {
   type: GenderType;
   allTypes: GenderType[];
+  resultCode: string;
 };
 
 type SectionKey = "system" | "dialogues" | "theory";
@@ -37,7 +38,11 @@ const coordinateMeta: {
   { dimension: "ml", left: "棱镜 M", right: "L 激光" },
 ];
 
-export function ResultPageClient({ type, allTypes }: ResultPageClientProps) {
+export function ResultPageClient({
+  type,
+  allTypes,
+  resultCode,
+}: ResultPageClientProps) {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const scores = useSyncExternalStore(
     subscribeToPrismScores,
@@ -72,7 +77,7 @@ export function ResultPageClient({ type, allTypes }: ResultPageClientProps) {
     () => scores ?? getDefaultScoresFromCode(type.code),
     [scores, type.code],
   );
-  const symbols = scores ? getTypeSymbols(scores) : getTypeSymbolsFromCode(type.code);
+  const symbols = scores ? getTypeSymbols(scores) : getTypeSymbolsFromCode(resultCode);
   const prismColor = scores ? getPersonalPrismColor(scores) : type.hex;
   const circleNeedsBorder = isLowContrastOnPaper(prismColor);
   const dialogueTypeByCode = useMemo(

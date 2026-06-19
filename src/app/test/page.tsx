@@ -4,6 +4,7 @@ import { questions } from "@/data/questions";
 import {
   type Answer,
   calculateScores,
+  getResultTypeCode,
   getTypeCode,
 } from "@/lib/scoring";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -92,12 +93,14 @@ export default function TestPage() {
       );
       const scores = calculateScores(scoringAnswers);
       const code = getTypeCode(scores);
+      const resultCode = getResultTypeCode(scores);
 
       sessionStorage.setItem("prismScores", JSON.stringify(scores));
       sessionStorage.setItem(
         storageKey,
         JSON.stringify({
           code,
+          resultCode,
           scores,
           basicInfo,
           answers: orderedAnswers,
@@ -108,7 +111,7 @@ export default function TestPage() {
         }),
       );
 
-      setResultCode(code);
+      setResultCode(resultCode);
       setStep("complete");
     },
     [basicInfo, testStartedAt],

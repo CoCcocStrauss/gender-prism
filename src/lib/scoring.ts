@@ -76,6 +76,26 @@ export function getTypeCode(scores: Scores): string {
   ].join("");
 }
 
+export function getResultTypeCode(scores: Scores): string {
+  return [
+    getResultLetter(scores.tw, "T", "W"),
+    getResultLetter(scores.rd, "R", "D"),
+    getResultLetter(scores.gf, "G", "F"),
+    getResultLetter(scores.ml, "M", "L"),
+  ].join("");
+}
+
+export function getResultTypeCodeFromCode(typeCode: string): string {
+  const [tw = "T", rd = "R", gf = "G", ml = "M"] = typeCode.toUpperCase();
+
+  return [
+    getCanonicalCodeLetter(tw, "T", "W"),
+    getCanonicalCodeLetter(rd, "R", "D"),
+    getCanonicalCodeLetter(gf, "G", "F"),
+    getCanonicalCodeLetter(ml, "M", "L"),
+  ].join("");
+}
+
 export function getTypeSymbols(scores: Scores): string {
   return [scores.tw, scores.rd, scores.gf, scores.ml]
     .map(getScoreSymbol)
@@ -138,6 +158,26 @@ function getBandLetter(
   }
 
   return middleLetter;
+}
+
+function getResultLetter(
+  score: number,
+  lowLetter: string,
+  highLetter: string,
+): string {
+  return score <= 50 ? lowLetter : highLetter;
+}
+
+function getCanonicalCodeLetter(
+  letter: string,
+  lowLetter: string,
+  highLetter: string,
+): string {
+  if (letter === highLetter) {
+    return highLetter;
+  }
+
+  return lowLetter;
 }
 
 function getScoreSymbol(score: number): string {

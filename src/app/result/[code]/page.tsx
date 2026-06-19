@@ -1,4 +1,5 @@
 import { genderTypes } from "@/data/types";
+import { getResultTypeCodeFromCode } from "@/lib/scoring";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ResultPageClient } from "./ResultPageClient";
@@ -14,7 +15,8 @@ export async function generateMetadata({
 }: ResultPageProps): Promise<Metadata> {
   const { code } = await params;
   const resultCode = code.toUpperCase();
-  const type = genderTypes.find((item) => item.code === resultCode);
+  const canonicalCode = getResultTypeCodeFromCode(resultCode);
+  const type = genderTypes.find((item) => item.code === canonicalCode);
 
   if (!type) {
     return {
@@ -52,11 +54,12 @@ export async function generateMetadata({
 export default async function ResultPage({ params }: ResultPageProps) {
   const { code } = await params;
   const resultCode = code.toUpperCase();
-  const type = genderTypes.find((item) => item.code === resultCode);
+  const canonicalCode = getResultTypeCodeFromCode(resultCode);
+  const type = genderTypes.find((item) => item.code === canonicalCode);
 
   if (!type) {
     notFound();
   }
 
-  return <ResultPageClient type={type} allTypes={genderTypes} />;
+  return <ResultPageClient type={type} allTypes={genderTypes} resultCode={resultCode} />;
 }

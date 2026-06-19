@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   type Answer,
   calculateScores,
+  getResultTypeCode,
+  getResultTypeCodeFromCode,
   getTypeCode,
   getTypeSymbols,
   getTypeSymbolsFromCode,
@@ -103,6 +105,18 @@ describe("getTypeCode", () => {
 
   it("uses high boundary letters at 62 and above", () => {
     expect(getTypeCode({ tw: 62, rd: 100, gf: 62, ml: 99 })).toBe("WDFL");
+  });
+});
+
+describe("result type routing code", () => {
+  it("maps scores to one of the 16 available result pages", () => {
+    expect(getResultTypeCode({ tw: 39, rd: 50, gf: 61, ml: 40 })).toBe("TRFM");
+    expect(getResultTypeCode({ tw: 62, rd: 100, gf: 62, ml: 99 })).toBe("WDFL");
+  });
+
+  it("maps middle-band code letters to canonical result pages", () => {
+    expect(getResultTypeCodeFromCode("BHPV")).toBe("TRGM");
+    expect(getResultTypeCodeFromCode("WDHL")).toBe("WDGL");
   });
 });
 
