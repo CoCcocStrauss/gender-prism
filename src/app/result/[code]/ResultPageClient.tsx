@@ -38,7 +38,7 @@ const coordinateMeta: {
 ];
 
 export function ResultPageClient({ type, allTypes }: ResultPageClientProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const scores = useSyncExternalStore(
     subscribeToPrismScores,
     getPrismScoresSnapshot,
@@ -222,7 +222,7 @@ export function ResultPageClient({ type, allTypes }: ResultPageClientProps) {
                     );
                   }
                 }
-                shouldReduceMotion={shouldReduceMotion ?? false}
+                shouldReduceMotion={shouldReduceMotion}
                 pulse={index === 0 && isPulseActive}
               />
             ))}
