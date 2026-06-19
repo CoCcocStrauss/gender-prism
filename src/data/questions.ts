@@ -19,7 +19,7 @@ export const questions: Question[] = [
   {
     id: 1,
     dimension: "TW",
-    text: "你在做一个重要决定时，更倾向于——独自深思后行动 / 广泛征求意见后行动",
+    text: "你在做一个重要决定时，更倾向于：独自深思后行动 / 广泛征求意见后行动",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -27,7 +27,7 @@ export const questions: Question[] = [
   {
     id: 2,
     dimension: "TW",
-    text: "朋友向你倾诉时，你更自然地——帮ta分析问题 / 陪伴ta的情绪",
+    text: "朋友向你倾诉时，你更自然地：帮ta分析问题 / 陪伴ta的情绪",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -35,7 +35,7 @@ export const questions: Question[] = [
   {
     id: 3,
     dimension: "TW",
-    text: "一段关系中让你最不舒服的是——对方过于依赖你 / 对方与你距离太远",
+    text: "一段关系中让你最不舒服的是：对方过于依赖你 / 对方与你距离太远",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -43,7 +43,7 @@ export const questions: Question[] = [
   {
     id: 4,
     dimension: "TW",
-    text: "小组项目刚开始时，你通常会先——明确自己负责的范围 / 了解每个人的节奏和感受",
+    text: "小组项目刚开始时，你通常会先：明确自己负责的范围 / 了解每个人的节奏和感受",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -51,7 +51,7 @@ export const questions: Question[] = [
   {
     id: 5,
     dimension: "TW",
-    text: "和家人意见不同的时候，你更希望——清楚说出自己的底线 / 慢慢找到大家都能接受的位置",
+    text: "和家人意见不同的时候，你更希望：清楚说出自己的底线 / 慢慢找到大家都能接受的位置",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -59,7 +59,7 @@ export const questions: Question[] = [
   {
     id: 6,
     dimension: "TW",
-    text: "计划一次旅行时，你会更重视——保留自由行动的时间 / 安排彼此一起经历的时刻",
+    text: "计划一次旅行时，你会更重视：保留自由行动的时间 / 安排彼此一起经历的时刻",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -67,7 +67,7 @@ export const questions: Question[] = [
   {
     id: 7,
     dimension: "TW",
-    text: "当朋友群里有人起冲突，你更可能先——理清各自责任 / 安抚现场气氛",
+    text: "当朋友群里有人起冲突，你更可能先：理清各自责任 / 安抚现场气氛",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -75,7 +75,7 @@ export const questions: Question[] = [
   {
     id: 8,
     dimension: "TW",
-    text: "独处一整天之后，你通常会——觉得重新校准了自己 / 想找亲近的人分享这一天",
+    text: "独处一整天之后，你通常会：觉得重新校准了自己 / 想找亲近的人分享这一天",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -83,7 +83,7 @@ export const questions: Question[] = [
   {
     id: 9,
     dimension: "TW",
-    text: "面对亲密关系里的日常安排，你更习惯——各自保持清楚分工 / 随时根据彼此状态调整",
+    text: "面对亲密关系里的日常安排，你更习惯：各自保持清楚分工 / 随时根据彼此状态调整",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -91,7 +91,7 @@ export const questions: Question[] = [
   {
     id: 10,
     dimension: "TW",
-    text: "在网络讨论中表达观点前，你更在意——观点是否足够清晰 / 话语会被群体怎样接住",
+    text: "在网络讨论中表达观点前，你更在意：观点是否足够清晰 / 话语会被群体怎样接住",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -99,7 +99,7 @@ export const questions: Question[] = [
   {
     id: 11,
     dimension: "TW",
-    text: "有人临时改变共同计划时，你更希望——先说明改变对你造成的影响 / 先理解对方为什么需要改变",
+    text: "有人临时改变共同计划时，你更希望：先说明改变对你造成的影响 / 先理解对方为什么需要改变",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -107,7 +107,7 @@ export const questions: Question[] = [
   {
     id: 12,
     dimension: "TW",
-    text: "当你需要支持时，最有帮助的是——有人给出清楚建议 / 有人稳定地陪在旁边",
+    text: "当你需要支持时，最有帮助的是：有人给出清楚建议 / 有人稳定地陪在旁边",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -115,7 +115,7 @@ export const questions: Question[] = [
   {
     id: 13,
     dimension: "RD",
-    text: "成长过程中，外界对你这个身份的期待和你自己想成为的样子之间——大体一致 / 有明显摩擦",
+    text: "成长过程中，外界对你这个身份的期待和你自己想成为的样子之间：大体一致 / 有明显摩擦",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -123,7 +123,7 @@ export const questions: Question[] = [
   {
     id: 14,
     dimension: "RD",
-    text: "当你的行为被评价为“很像你这个性别会做的事”时，你通常——不太在意 / 会有微妙的不舒服",
+    text: "当你的行为被评价为“很像你这个性别会做的事”时，你通常：不太在意 / 会有微妙的不舒服",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -131,7 +131,7 @@ export const questions: Question[] = [
   {
     id: 15,
     dimension: "RD",
-    text: "在“只有你这个性别的人”的聚会中，你会——感到自在 / 感到格格不入",
+    text: "在“只有你这个性别的人”的聚会中，你会：感到自在 / 感到格格不入",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -139,7 +139,7 @@ export const questions: Question[] = [
   {
     id: 16,
     dimension: "RD",
-    text: "填写表格只提供两个性别选项时，你的感受更接近——这只是普通流程 / 这里有点卡住我",
+    text: "填写表格只提供两个性别选项时，你的感受更接近：这只是普通流程 / 这里有点卡住我",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -147,7 +147,7 @@ export const questions: Question[] = [
   {
     id: 17,
     dimension: "RD",
-    text: "别人根据你的性别预设你擅长某件事时，你会——顺手接过这个期待 / 想把自己从这个期待里拿出来",
+    text: "别人根据你的性别预设你擅长某件事时，你会：顺手接过这个期待 / 想把自己从这个期待里拿出来",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -155,7 +155,7 @@ export const questions: Question[] = [
   {
     id: 18,
     dimension: "RD",
-    text: "在学校或工作场合被分到“你这个性别通常会去的那一组”时，你更可能——觉得安排自然 / 先停顿一下再进入",
+    text: "在学校或工作场合被分到“你这个性别通常会去的那一组”时，你更可能：觉得安排自然 / 先停顿一下再进入",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -163,7 +163,7 @@ export const questions: Question[] = [
   {
     id: 19,
     dimension: "RD",
-    text: "家人用“你这样很合适”来称赞你时，你通常——觉得被看见了 / 觉得被放进了一个框",
+    text: "家人用“你这样很合适”来称赞你时，你通常：觉得被看见了 / 觉得被放进了一个框",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -171,7 +171,7 @@ export const questions: Question[] = [
   {
     id: 20,
     dimension: "RD",
-    text: "为了确认你正在认真阅读，请在这一题选择“比较接近后者”——我会随手点完 / 我会照着说明选择",
+    text: "为了确认你正在认真阅读，请在这一题选择“比较接近后者”：我会随手点完 / 我会照着说明选择",
     options: likertOptions,
     reverse: false,
     attentionCheck: true,
@@ -179,7 +179,7 @@ export const questions: Question[] = [
   {
     id: 21,
     dimension: "RD",
-    text: "走进被明确标记为某个性别使用的空间时，你更常——自然进入 / 意识到自己正在被分类",
+    text: "走进被明确标记为某个性别使用的空间时，你更常：自然进入 / 意识到自己正在被分类",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -187,7 +187,7 @@ export const questions: Question[] = [
   {
     id: 22,
     dimension: "RD",
-    text: "当别人说“这很适合你们这类人”时，你的第一反应更接近——可以理解这个说法 / 想问对方为什么这么判断",
+    text: "当别人说“这很适合你们这类人”时，你的第一反应更接近：可以理解这个说法 / 想问对方为什么这么判断",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -195,7 +195,7 @@ export const questions: Question[] = [
   {
     id: 23,
     dimension: "RD",
-    text: "看到影视作品里与你相同身份的人物设定时，你通常——能轻松代入 / 经常觉得哪里不太贴合",
+    text: "看到影视作品里与你相同身份的人物设定时，你通常：能轻松代入 / 经常觉得哪里不太贴合",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -203,7 +203,7 @@ export const questions: Question[] = [
   {
     id: 24,
     dimension: "RD",
-    text: "在公共场合被陌生人用性别化称呼招呼时，你通常——顺畅回应 / 会短暂感到别扭",
+    text: "在公共场合被陌生人用性别化称呼招呼时，你通常：顺畅回应 / 会短暂感到别扭",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -211,7 +211,7 @@ export const questions: Question[] = [
   {
     id: 25,
     dimension: "GF",
-    text: "过去一个月，你主动想过“性别影响了这件事”大概——几乎没有 / 几乎每天",
+    text: "过去一个月，你主动想过“性别影响了这件事”大概：几乎没有 / 几乎每天",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -219,7 +219,7 @@ export const questions: Question[] = [
   {
     id: 26,
     dimension: "GF",
-    text: "有人问“性别对你意味着什么”，你的第一反应更接近——从没认真想过 / 脑中有完整答案",
+    text: "有人问“性别对你意味着什么”，你的第一反应更接近：从没认真想过 / 脑中有完整答案",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -227,7 +227,7 @@ export const questions: Question[] = [
   {
     id: 27,
     dimension: "GF",
-    text: "你会主动关注社交媒体上的性别相关讨论吗——几乎不 / 经常",
+    text: "你会主动关注社交媒体上的性别相关讨论吗：几乎不 / 经常",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -235,7 +235,7 @@ export const questions: Question[] = [
   {
     id: 28,
     dimension: "GF",
-    text: "挑选衣服或外观风格时，性别在你的判断里通常——只是很远的背景 / 是很清楚的参考点",
+    text: "挑选衣服或外观风格时，性别在你的判断里通常：只是很远的背景 / 是很清楚的参考点",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -243,7 +243,7 @@ export const questions: Question[] = [
   {
     id: 29,
     dimension: "GF",
-    text: "回顾一段重要经历时，你会把性别看作——不太相关的旁枝 / 影响理解这件事的线索",
+    text: "回顾一段重要经历时，你会把性别看作：不太相关的旁枝 / 影响理解这件事的线索",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -251,7 +251,7 @@ export const questions: Question[] = [
   {
     id: 30,
     dimension: "GF",
-    text: "朋友聊到身份和自我认识时，你通常——更多听别人怎么说 / 很快能联系到自己的经验",
+    text: "朋友聊到身份和自我认识时，你通常：更多听别人怎么说 / 很快能联系到自己的经验",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -259,7 +259,7 @@ export const questions: Question[] = [
   {
     id: 31,
     dimension: "GF",
-    text: "在陌生环境介绍自己时，你会觉得性别信息——通常不需要特别提起 / 可能影响别人如何理解我",
+    text: "在陌生环境介绍自己时，你会觉得性别信息：通常不需要特别提起 / 可能影响别人如何理解我",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -267,7 +267,7 @@ export const questions: Question[] = [
   {
     id: 32,
     dimension: "GF",
-    text: "独处时想到“我是谁”这类问题，性别通常——很少进入画面 / 经常站到画面中央",
+    text: "独处时想到“我是谁”这类问题，性别通常：很少进入画面 / 经常站到画面中央",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -275,7 +275,7 @@ export const questions: Question[] = [
   {
     id: 33,
     dimension: "GF",
-    text: "读到一篇关于日常生活差异的文章时，你更可能——把它当作普通观察 / 想到自己的性别经验",
+    text: "读到一篇关于日常生活差异的文章时，你更可能：把它当作普通观察 / 想到自己的性别经验",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -283,7 +283,7 @@ export const questions: Question[] = [
   {
     id: 34,
     dimension: "GF",
-    text: "做人生规划时，性别对你来说更像——偶尔才会出现的变量 / 需要经常纳入考虑的变量",
+    text: "做人生规划时，性别对你来说更像：偶尔才会出现的变量 / 需要经常纳入考虑的变量",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -291,7 +291,7 @@ export const questions: Question[] = [
   {
     id: 35,
     dimension: "GF",
-    text: "和亲密的人谈未来时，你会——很少从性别角度展开 / 主动谈它可能带来的影响",
+    text: "和亲密的人谈未来时，你会：很少从性别角度展开 / 主动谈它可能带来的影响",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -299,7 +299,7 @@ export const questions: Question[] = [
   {
     id: 36,
     dimension: "GF",
-    text: "当别人用性别来解释你的选择时，你更可能——觉得这只是众多解释之一 / 立刻想细看这个解释是否成立",
+    text: "当别人用性别来解释你的选择时，你更可能：觉得这只是众多解释之一 / 立刻想细看这个解释是否成立",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -307,7 +307,7 @@ export const questions: Question[] = [
   {
     id: 37,
     dimension: "ML",
-    text: "你的家人、同事和密友分别形容你的“气质”，描述会——非常一致 / 差别很大",
+    text: "你的家人、同事和密友分别形容你的“气质”，描述会：非常一致 / 差别很大",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -315,7 +315,7 @@ export const questions: Question[] = [
   {
     id: 38,
     dimension: "ML",
-    text: "从工作模式切换到私人模式时——你几乎是同一个人 / 感觉自己换了一个频道",
+    text: "从工作模式切换到私人模式时：你几乎是同一个人 / 感觉自己换了一个频道",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -323,7 +323,7 @@ export const questions: Question[] = [
   {
     id: 39,
     dimension: "ML",
-    text: "你是否会根据场合调整说话方式和行为风格——几乎不 / 明显调整",
+    text: "你是否会根据场合调整说话方式和行为风格：几乎不 / 明显调整",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -331,7 +331,7 @@ export const questions: Question[] = [
   {
     id: 40,
     dimension: "ML",
-    text: "在正式场合和熟人聚会里，你呈现出来的状态通常——像同一束稳定的光 / 像经过不同切面的光",
+    text: "在正式场合和熟人聚会里，你呈现出来的状态通常：像同一束稳定的光 / 像经过不同切面的光",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -339,7 +339,7 @@ export const questions: Question[] = [
   {
     id: 41,
     dimension: "ML",
-    text: "选择头像、昵称或签名时，你会——长期保持一个版本 / 随阶段或平台换不同版本",
+    text: "选择头像、昵称或签名时，你会：长期保持一个版本 / 随阶段或平台换不同版本",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -347,7 +347,7 @@ export const questions: Question[] = [
   {
     id: 42,
     dimension: "ML",
-    text: "和不同朋友相处时，你的表达方式——大体保持一致 / 会自然出现不同侧面",
+    text: "和不同朋友相处时，你的表达方式：大体保持一致 / 会自然出现不同侧面",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -355,7 +355,7 @@ export const questions: Question[] = [
   {
     id: 43,
     dimension: "ML",
-    text: "面对新环境时，你更常——带着稳定的自我风格进入 / 先观察氛围再调出合适的一面",
+    text: "面对新环境时，你更常：带着稳定的自我风格进入 / 先观察氛围再调出合适的一面",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
@@ -363,7 +363,7 @@ export const questions: Question[] = [
   {
     id: 44,
     dimension: "ML",
-    text: "在家庭聊天和网络发言之间，你的语气会——差别不大 / 像使用两套不同的语感",
+    text: "在家庭聊天和网络发言之间，你的语气会：差别不大 / 像使用两套不同的语感",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -371,7 +371,7 @@ export const questions: Question[] = [
   {
     id: 45,
     dimension: "ML",
-    text: "为了确认你仍在阅读，请在这一题选择“两边都差不多”——我会忽略说明 / 我会按说明作答",
+    text: "为了确认你仍在阅读，请在这一题选择“两边都差不多”：我会忽略说明 / 我会按说明作答",
     options: likertOptions,
     reverse: false,
     attentionCheck: true,
@@ -379,7 +379,7 @@ export const questions: Question[] = [
   {
     id: 46,
     dimension: "ML",
-    text: "别人说“你在这里和平时不太一样”时，你通常——觉得有点意外 / 觉得这很正常",
+    text: "别人说“你在这里和平时不太一样”时，你通常：觉得有点意外 / 觉得这很正常",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -387,7 +387,7 @@ export const questions: Question[] = [
   {
     id: 47,
     dimension: "ML",
-    text: "参加不同类型活动前，你会——沿用自己舒服的固定状态 / 像准备不同场景的不同服装",
+    text: "参加不同类型活动前，你会：沿用自己舒服的固定状态 / 像准备不同场景的不同服装",
     options: likertOptions,
     reverse: false,
     attentionCheck: false,
@@ -395,7 +395,7 @@ export const questions: Question[] = [
   {
     id: 48,
     dimension: "ML",
-    text: "在亲密关系里，你希望对方看到的你——和外界看到的差不多 / 包含更多不常展示的层次",
+    text: "在亲密关系里，你希望对方看到的你：和外界看到的差不多 / 包含更多不常展示的层次",
     options: likertOptions,
     reverse: true,
     attentionCheck: false,
