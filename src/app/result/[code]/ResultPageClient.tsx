@@ -222,7 +222,7 @@ export function ResultPageClient({ type, allTypes }: ResultPageClientProps) {
                     );
                   }
                 }
-                shouldReduceMotion={shouldReduceMotion}
+                shouldReduceMotion={shouldReduceMotion ?? false}
                 pulse={index === 0 && isPulseActive}
               />
             ))}
