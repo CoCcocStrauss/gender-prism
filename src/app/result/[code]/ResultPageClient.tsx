@@ -22,7 +22,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 
 type ResultPageClientProps = {
@@ -51,11 +50,7 @@ export function ResultPageClient({
   resultCode,
 }: ResultPageClientProps) {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const scores = useSyncExternalStore(
-    subscribeToPrismScores,
-    getPrismScoresSnapshot,
-    getPrismScoresServerSnapshot,
-  );
+  const [scores, setScores] = useState<PrismScores | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey | null>(null);
   const [copied, setCopied] = useState<"tagline" | "link" | null>(null);
   const shareCardRef = useRef<HTMLDivElement | null>(null);
@@ -69,6 +64,21 @@ export function ResultPageClient({
 
     return () => clearTimeout(timer);
   }, [copied]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const updateScoresFromStorage = () => {
+      setScores(parseStoredScores(window.sessionStorage.getItem("prismScores")));
+    };
+
+    updateScoresFromStorage();
+    window.addEventListener("storage", updateScoresFromStorage);
+
+    return () => window.removeEventListener("storage", updateScoresFromStorage);
+  }, []);
 
   const displayedScores = useMemo(
     () => scores ?? getDefaultScoresFromCode(type.code),
@@ -453,28 +463,6 @@ function parseStoredScores(value: string | null): PrismScores | null {
     return null;
   }
 
-  return null;
-}
-
-function subscribeToPrismScores(onStoreChange: () => void): () => void {
-  if (typeof window === "undefined") {
-    return () => {};
-  }
-
-  window.addEventListener("storage", onStoreChange);
-
-  return () => window.removeEventListener("storage", onStoreChange);
-}
-
-function getPrismScoresSnapshot(): PrismScores | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return parseStoredScores(sessionStorage.getItem("prismScores"));
-}
-
-function getPrismScoresServerSnapshot(): PrismScores | null {
   return null;
 }
 

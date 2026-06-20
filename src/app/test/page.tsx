@@ -40,6 +40,8 @@ export default function TestPage() {
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasFinishedRef = useRef(false);
+  const hasNavigatedRef = useRef(false);
   const [step, setStep] = useState<Step>("intro");
   const [basicInfo, setBasicInfo] = useState<BasicInfo>({});
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,6 +81,12 @@ export default function TestPage() {
 
   const finishTest = useCallback(
     (nextAnswers: Record<number, TimedAnswer>) => {
+      if (hasFinishedRef.current) {
+        console.log("[GenderPrism:test] finishTest skipped: already finished");
+        return;
+      }
+
+      hasFinishedRef.current = true;
       const completedAt = Date.now();
       const orderedAnswers = questions
         .map((question) => nextAnswers[question.id])
@@ -95,24 +103,46 @@ export default function TestPage() {
       const code = getTypeCode(scores);
       const resultCode = getResultTypeCode(scores);
 
-      sessionStorage.setItem("prismScores", JSON.stringify(scores));
-      sessionStorage.setItem(
-        storageKey,
-        JSON.stringify({
-          code,
-          resultCode,
-          scores,
-          basicInfo,
-          answers: orderedAnswers,
-          startedAt: testStartedAt,
-          completedAt,
-          totalTimeSeconds:
-            testStartedAt === null ? undefined : (completedAt - testStartedAt) / 1000,
-        }),
-      );
+      console.log("[GenderPrism:test] finishTest calculated", {
+        code,
+        resultCode,
+        scores,
+        answerCount: orderedAnswers.length,
+      });
+
+      if (typeof window !== "undefined") {
+        try {
+          window.sessionStorage.setItem("prismScores", JSON.stringify(scores));
+          window.sessionStorage.setItem(
+            storageKey,
+            JSON.stringify({
+              code,
+              resultCode,
+              scores,
+              basicInfo,
+              answers: orderedAnswers,
+              startedAt: testStartedAt,
+              completedAt,
+              totalTimeSeconds:
+                testStartedAt === null
+                  ? undefined
+                  : (completedAt - testStartedAt) / 1000,
+            }),
+          );
+          console.log("[GenderPrism:test] sessionStorage written", {
+            resultCode,
+            storageKey,
+          });
+        } catch (error) {
+          console.error("[GenderPrism:test] sessionStorage write failed", error);
+        }
+      } else {
+        console.log("[GenderPrism:test] sessionStorage skipped: no window");
+      }
 
       setResultCode(resultCode);
       setStep("complete");
+      console.log("[GenderPrism:test] complete state set", { resultCode });
     },
     [basicInfo, testStartedAt],
   );
@@ -178,11 +208,24 @@ export default function TestPage() {
       return;
     }
 
+    const target = `/result/${resultCode}`;
+    console.log("[GenderPrism:test] scheduling result navigation", { target });
+
     const timer = setTimeout(() => {
-      router.push(`/result/${resultCode}`);
+      if (hasNavigatedRef.current) {
+        console.log("[GenderPrism:test] push skipped: already navigated");
+        return;
+      }
+
+      hasNavigatedRef.current = true;
+      console.log("[GenderPrism:test] pushing result route", { target });
+      router.push(target);
     }, 2000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      console.log("[GenderPrism:test] clearing result navigation timer", { target });
+      clearTimeout(timer);
+    };
   }, [resultCode, router, step]);
 
   useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
