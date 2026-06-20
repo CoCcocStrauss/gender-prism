@@ -70,9 +70,9 @@ export function useShareCard(
   cardRef: RefObject<HTMLElement | null>,
   code: string,
 ) {
-  const downloadCard = async () => {
+  const createCardBlob = async (): Promise<Blob | null> => {
     if (!cardRef.current) {
-      return;
+      return null;
     }
 
     const target =
@@ -90,6 +90,16 @@ export function useShareCard(
     );
 
     if (!blob) {
+      return null;
+    }
+
+    return blob;
+  };
+
+  const downloadCard = async () => {
+    const blob = await createCardBlob();
+
+    if (!blob) {
       return;
     }
 
@@ -101,7 +111,7 @@ export function useShareCard(
     URL.revokeObjectURL(url);
   };
 
-  return { downloadCard };
+  return { createCardBlob, downloadCard };
 }
 
 function ShareCardLayout({

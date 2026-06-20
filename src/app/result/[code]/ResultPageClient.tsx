@@ -16,6 +16,7 @@ import {
 import { getTypeSymbols, getTypeSymbolsFromCode, isMiddleScore } from "@/lib/scoring";
 import { ShareCard, useShareCard } from "@/components/ShareCard";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import {
   useEffect,
@@ -53,6 +54,7 @@ export function ResultPageClient({
   const [scores, setScores] = useState<PrismScores | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey | null>(null);
   const [copied, setCopied] = useState<"tagline" | "link" | null>(null);
+  const [sharePreviewUrl, setSharePreviewUrl] = useState<string | null>(null);
   const shareCardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -98,12 +100,47 @@ export function ResultPageClient({
     () => new Map(allTypes.map((item) => [item.code, item])),
     [allTypes],
   );
-  const { downloadCard } = useShareCard(shareCardRef, type.code);
+  const { createCardBlob, downloadCard } = useShareCard(shareCardRef, type.code);
 
   const copyText = async (text: string, copiedKey: "tagline" | "link") => {
     await navigator.clipboard.writeText(text);
     setCopied(copiedKey);
   };
+
+  const closeSharePreview = () => {
+    if (sharePreviewUrl) {
+      URL.revokeObjectURL(sharePreviewUrl);
+    }
+
+    setSharePreviewUrl(null);
+  };
+
+  const saveShareCard = async () => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      const blob = await createCardBlob();
+
+      if (!blob) {
+        return;
+      }
+
+      if (sharePreviewUrl) {
+        URL.revokeObjectURL(sharePreviewUrl);
+      }
+
+      setSharePreviewUrl(URL.createObjectURL(blob));
+      return;
+    }
+
+    await downloadCard();
+  };
+
+  useEffect(() => {
+    return () => {
+      if (sharePreviewUrl) {
+        URL.revokeObjectURL(sharePreviewUrl);
+      }
+    };
+  }, [sharePreviewUrl]);
 
   return (
     <main className="min-h-screen bg-background px-6 text-foreground">
@@ -271,7 +308,7 @@ export function ResultPageClient({
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              onClick={downloadCard}
+              onClick={saveShareCard}
               className="rounded-lg bg-accent px-7 py-3.5 text-sm font-medium leading-none text-background transition-opacity duration-200 hover:opacity-85"
             >
               保存棱镜卡
@@ -307,7 +344,49 @@ export function ResultPageClient({
       <div ref={shareCardRef}>
         <ShareCard type={type} scores={scores} />
       </div>
+      {sharePreviewUrl ? (
+        <ShareCardPreviewOverlay
+          imageUrl={sharePreviewUrl}
+          onClose={closeSharePreview}
+        />
+      ) : null}
     </main>
+  );
+}
+
+function ShareCardPreviewOverlay({
+  imageUrl,
+  onClose,
+}: {
+  imageUrl: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[rgba(0,0,0,0.85)] px-5 pb-8">
+      <div className="sticky top-0 z-10 bg-[rgba(0,0,0,0.85)] pt-4">
+        <p className="text-center text-[14px] leading-6 text-white">
+          长按图片保存到相册
+        </p>
+        <button
+          type="button"
+          aria-label="关闭分享卡预览"
+          onClick={onClose}
+          className="absolute right-0 top-2 flex h-11 w-11 items-center justify-center text-[24px] leading-none text-white"
+        >
+          ×
+        </button>
+      </div>
+      <div className="flex justify-center py-6">
+        <Image
+          src={imageUrl}
+          alt="性别棱镜分享卡"
+          width={1080}
+          height={2400}
+          unoptimized
+          className="h-auto w-[90vw] max-w-none"
+        />
+      </div>
+    </div>
   );
 }
 
