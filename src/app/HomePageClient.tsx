@@ -38,7 +38,7 @@ export function HomePageClient() {
         </h1>
 
         <p className="mt-4 max-w-[560px] text-base leading-[1.8] text-muted">
-          不是测你「是」什么性别 —— 而是测你如何「做」你的性别
+          你是如何「做」你的性别的？
         </p>
 
         <div className="mt-10">
@@ -49,7 +49,7 @@ export function HomePageClient() {
             开始测试 →
           </Link>
           <p className="mt-4 text-[13px] leading-6 text-muted">
-            48 题 · 约 4 分钟 · 无需注册
+            48 题 · 无需注册 · 完成后查看全图鉴，也可能解锁隐藏图鉴
           </p>
         </div>
       </section>

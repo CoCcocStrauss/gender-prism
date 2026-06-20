@@ -1,4 +1,6 @@
 import { genderTypes } from "@/data/types";
+import { getTypeQuote, getTypeQuotePreview } from "@/data/typeQuotes";
+import { getResultTypeCodeFromCode } from "@/lib/scoring";
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
@@ -12,13 +14,15 @@ type OgRouteProps = {
 export async function GET(_request: Request, { params }: OgRouteProps) {
   const { code } = await params;
   const resultCode = code.toUpperCase();
-  const type = genderTypes.find((item) => item.code === resultCode);
+  const canonicalCode = getResultTypeCodeFromCode(resultCode);
+  const type = genderTypes.find((item) => item.code === canonicalCode);
 
   if (!type) {
     return new Response("Not found", { status: 404 });
   }
 
-  const preview = truncate(type.tagline, 30);
+  const quote = getTypeQuote(type.code);
+  const preview = truncate(quote ? getTypeQuotePreview(quote) : type.tagline, 30);
 
   return new ImageResponse(
     (

@@ -9,7 +9,7 @@ import {
 } from "@/lib/scoring";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Step = "intro" | "test" | "complete";
 
@@ -157,11 +157,6 @@ export default function TestPage() {
     ],
   );
 
-  const canGoNext = useMemo(
-    () => Boolean(currentAnswer) && currentIndex < questions.length - 1,
-    [currentAnswer, currentIndex],
-  );
-
   useEffect(() => {
     if (step !== "test") {
       return;
@@ -171,20 +166,12 @@ export default function TestPage() {
       if (event.key >= "1" && event.key <= "5") {
         selectAnswer(Number(event.key));
       }
-
-      if (event.key === "ArrowLeft" && currentIndex > 0) {
-        goToQuestion(currentIndex - 1);
-      }
-
-      if (event.key === "ArrowRight" && canGoNext) {
-        goToQuestion(currentIndex + 1);
-      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
 
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [canGoNext, currentIndex, goToQuestion, selectAnswer, step]);
+  }, [selectAnswer, step]);
 
   useEffect(() => {
     if (step !== "complete" || !resultCode) {
@@ -319,9 +306,7 @@ export default function TestPage() {
             animate="visible"
             exit="exit"
           >
-            <p className="mx-auto max-w-[560px] text-center text-lg font-normal leading-[1.65] tracking-[-0.01em] text-foreground sm:text-[22px]">
-              {currentQuestion.text}
-            </p>
+            <QuestionPrompt text={currentQuestion.text} />
 
             <div className="mx-auto mt-10 max-w-lg space-y-3">
               {currentQuestion.options.map((option) => {
@@ -349,7 +334,7 @@ export default function TestPage() {
             </div>
 
             <p className="mt-12 text-center text-[13px] leading-6 text-muted">
-              可按 1-5 选择，← → 翻页
+              可按 1-5 选择
               {answeredQuestions > 0 ? ` · 已回答 ${answeredQuestions} 题` : ""}
             </p>
           </motion.div>
@@ -357,6 +342,40 @@ export default function TestPage() {
       </section>
     </motion.main>
   );
+}
+
+function QuestionPrompt({ text }: { text: string }) {
+  const prompt = formatQuestionPrompt(text);
+
+  if (!prompt.options) {
+    return (
+      <p className="mx-auto max-w-[560px] text-center text-lg font-normal leading-[1.65] tracking-[-0.01em] text-foreground sm:text-[22px]">
+        {text}
+      </p>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-[560px] text-center text-lg font-normal leading-[1.65] tracking-[-0.01em] text-foreground sm:text-[22px]">
+      <p>{prompt.stem}：</p>
+      <p className="mt-3">{prompt.options}</p>
+    </div>
+  );
+}
+
+function formatQuestionPrompt(
+  text: string,
+): { stem: string; options?: string } {
+  const [stem, options] = text.split("：");
+
+  if (!stem || !options) {
+    return { stem: text };
+  }
+
+  return {
+    stem,
+    options,
+  };
 }
 
 function OptionGroup({

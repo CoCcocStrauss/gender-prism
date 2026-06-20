@@ -1,4 +1,5 @@
 import { genderTypes } from "@/data/types";
+import { getTypeQuote, getTypeQuotePreview } from "@/data/typeQuotes";
 import { getResultTypeCodeFromCode } from "@/lib/scoring";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -26,13 +27,15 @@ export async function generateMetadata({
 
   const title = `${type.nameZh} · ${type.nameEn} — Gender Prism`;
   const imageUrl = `/api/og/${type.code}`;
+  const quote = getTypeQuote(type.code);
+  const description = quote ? getTypeQuotePreview(quote) : type.tagline;
 
   return {
     title,
-    description: type.tagline,
+    description,
     openGraph: {
       title,
-      description: type.tagline,
+      description,
       images: [
         {
           url: imageUrl,
@@ -45,7 +48,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title,
-      description: type.tagline,
+      description,
       images: [imageUrl],
     },
   };

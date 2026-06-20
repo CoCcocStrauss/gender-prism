@@ -16,6 +16,8 @@ export type Scores = {
   ml: number;
 };
 
+type ScoreDimension = keyof Scores;
+
 export type ValidationIssue = "attention_failed" | "too_fast" | "all_same";
 
 export type ValidationResult = {
@@ -77,6 +79,14 @@ export function getTypeCode(scores: Scores): string {
 }
 
 export function getResultTypeCode(scores: Scores): string {
+  const hiddenTypeCode = getHiddenTypeCodeFromMiddleDimensions(
+    getMiddleDimensionsFromScores(scores),
+  );
+
+  if (hiddenTypeCode) {
+    return hiddenTypeCode;
+  }
+
   return [
     getResultLetter(scores.tw, "T", "W"),
     getResultLetter(scores.rd, "R", "D"),
@@ -86,7 +96,22 @@ export function getResultTypeCode(scores: Scores): string {
 }
 
 export function getResultTypeCodeFromCode(typeCode: string): string {
-  const [tw = "T", rd = "R", gf = "G", ml = "M"] = typeCode.toUpperCase();
+  const normalizedCode = typeCode.toUpperCase();
+  const hiddenAlias = getHiddenAliasCode(normalizedCode);
+
+  if (hiddenAlias) {
+    return hiddenAlias;
+  }
+
+  const hiddenTypeCode = getHiddenTypeCodeFromMiddleDimensions(
+    getMiddleDimensionsFromCode(normalizedCode),
+  );
+
+  if (hiddenTypeCode) {
+    return hiddenTypeCode;
+  }
+
+  const [tw = "T", rd = "R", gf = "G", ml = "M"] = normalizedCode;
 
   return [
     getCanonicalCodeLetter(tw, "T", "W"),
@@ -103,11 +128,99 @@ export function getTypeSymbols(scores: Scores): string {
 }
 
 export function getTypeSymbolsFromCode(typeCode: string): string {
+  const hiddenCode = getHiddenAliasCode(typeCode.toUpperCase());
+
+  if (hiddenCode) {
+    return getHiddenTypeSymbols(hiddenCode);
+  }
+
   return typeCode
     .toUpperCase()
     .split("")
     .map(getCodeSymbol)
     .join(" ");
+}
+
+export function isMiddleScore(score: number): boolean {
+  return score > 38 && score < 62;
+}
+
+function getMiddleDimensionsFromScores(scores: Scores): ScoreDimension[] {
+  return (["tw", "rd", "gf", "ml"] satisfies ScoreDimension[]).filter(
+    (dimension) => isMiddleScore(scores[dimension]),
+  );
+}
+
+function getMiddleDimensionsFromCode(typeCode: string): ScoreDimension[] {
+  const middleLetterByDimension: Record<ScoreDimension, string> = {
+    tw: "B",
+    rd: "H",
+    gf: "P",
+    ml: "V",
+  };
+
+  return (["tw", "rd", "gf", "ml"] satisfies ScoreDimension[]).filter(
+    (dimension, index) => typeCode[index] === middleLetterByDimension[dimension],
+  );
+}
+
+function getHiddenTypeCodeFromMiddleDimensions(
+  middleDimensions: ScoreDimension[],
+): string | null {
+  if (middleDimensions.length < 2) {
+    return null;
+  }
+
+  if (middleDimensions.length === 4) {
+    return "HIDDEN_DRIFT";
+  }
+
+  if (middleDimensions.length === 3) {
+    return "HIDDEN_TWILIGHT";
+  }
+
+  const middleDimensionKey = middleDimensions.join(",");
+
+  if (middleDimensionKey === "tw,rd") {
+    return "HIDDEN_SMOKE";
+  }
+
+  if (middleDimensionKey === "gf,ml") {
+    return "HIDDEN_DEW";
+  }
+
+  return "HIDDEN_RIDGE";
+}
+
+function getHiddenAliasCode(typeCode: string): string | null {
+  const hiddenAliasByCode: Record<string, string> = {
+    DRIFT: "HIDDEN_DRIFT",
+    SUSPENDED: "HIDDEN_DRIFT",
+    HIDDEN_DRIFT: "HIDDEN_DRIFT",
+    DUSK: "HIDDEN_TWILIGHT",
+    TWILIGHT: "HIDDEN_TWILIGHT",
+    HIDDEN_TWILIGHT: "HIDDEN_TWILIGHT",
+    SMOKE: "HIDDEN_SMOKE",
+    HIDDEN_SMOKE: "HIDDEN_SMOKE",
+    DEW: "HIDDEN_DEW",
+    HIDDEN_DEW: "HIDDEN_DEW",
+    RIDGE: "HIDDEN_RIDGE",
+    HIDDEN_RIDGE: "HIDDEN_RIDGE",
+  };
+
+  return hiddenAliasByCode[typeCode] ?? null;
+}
+
+function getHiddenTypeSymbols(typeCode: string): string {
+  const symbolsByTypeCode: Record<string, string> = {
+    HIDDEN_DRIFT: "◐ ◐ ◐ ◐",
+    HIDDEN_TWILIGHT: "● ◐ ◐ ◐",
+    HIDDEN_SMOKE: "◐ ◐ ● ●",
+    HIDDEN_DEW: "● ● ◐ ◐",
+    HIDDEN_RIDGE: "◐ ● ◐ ●",
+  };
+
+  return symbolsByTypeCode[typeCode] ?? "◐ ◐ ◐ ◐";
 }
 
 export function validateAnswers(answers: Answer[]): ValidationResult {

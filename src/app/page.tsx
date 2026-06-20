@@ -4,11 +4,11 @@ import { HomePageClient } from "./HomePageClient";
 export const metadata: Metadata = {
   title: "Gender Prism — 你和性别之间，是什么关系？",
   description:
-    "四个维度，十六种类型。不是测你'是'什么性别——而是测你如何'做'你的性别。",
+    "四个维度，十六种类型。你是如何'做'你的性别的？",
   openGraph: {
     title: "Gender Prism — 你和性别之间，是什么关系？",
     description:
-      "四个维度，十六种类型。不是测你'是'什么性别——而是测你如何'做'你的性别。",
+      "四个维度，十六种类型。你是如何'做'你的性别的？",
     images: [
       {
         url: "/api/og",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Gender Prism — 你和性别之间，是什么关系？",
     description:
-      "四个维度，十六种类型。不是测你'是'什么性别——而是测你如何'做'你的性别。",
+      "四个维度，十六种类型。你是如何'做'你的性别的？",
     images: ["/api/og"],
   },
 };

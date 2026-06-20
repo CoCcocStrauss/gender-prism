@@ -109,13 +109,39 @@ describe("getTypeCode", () => {
 });
 
 describe("result type routing code", () => {
-  it("maps scores to one of the 16 available result pages", () => {
-    expect(getResultTypeCode({ tw: 39, rd: 50, gf: 61, ml: 40 })).toBe("TRFM");
+  it("maps scores with no middle dimensions to one of the 16 core result pages", () => {
     expect(getResultTypeCode({ tw: 62, rd: 100, gf: 62, ml: 99 })).toBe("WDFL");
   });
 
-  it("maps middle-band code letters to canonical result pages", () => {
-    expect(getResultTypeCodeFromCode("BHPV")).toBe("TRGM");
+  it("rounds a single middle dimension to the nearest core letter", () => {
+    expect(getResultTypeCode({ tw: 45, rd: 25, gf: 25, ml: 75 })).toBe("TRGL");
+    expect(getResultTypeCode({ tw: 55, rd: 25, gf: 25, ml: 75 })).toBe("WRGL");
+  });
+
+  it("maps two or more middle dimensions to hidden result types", () => {
+    expect(getResultTypeCode({ tw: 50, rd: 50, gf: 50, ml: 50 })).toBe(
+      "HIDDEN_DRIFT",
+    );
+    expect(getResultTypeCode({ tw: 50, rd: 50, gf: 50, ml: 75 })).toBe(
+      "HIDDEN_TWILIGHT",
+    );
+    expect(getResultTypeCode({ tw: 50, rd: 50, gf: 25, ml: 25 })).toBe(
+      "HIDDEN_SMOKE",
+    );
+    expect(getResultTypeCode({ tw: 25, rd: 25, gf: 50, ml: 50 })).toBe(
+      "HIDDEN_DEW",
+    );
+    expect(getResultTypeCode({ tw: 50, rd: 25, gf: 50, ml: 75 })).toBe(
+      "HIDDEN_RIDGE",
+    );
+  });
+
+  it("maps middle-band code letters and hidden aliases to hidden result pages", () => {
+    expect(getResultTypeCodeFromCode("BHPV")).toBe("HIDDEN_DRIFT");
+    expect(getResultTypeCodeFromCode("BHGL")).toBe("HIDDEN_SMOKE");
+    expect(getResultTypeCodeFromCode("TRPV")).toBe("HIDDEN_DEW");
+    expect(getResultTypeCodeFromCode("BRPL")).toBe("HIDDEN_RIDGE");
+    expect(getResultTypeCodeFromCode("drift")).toBe("HIDDEN_DRIFT");
     expect(getResultTypeCodeFromCode("WDHL")).toBe("WDGL");
   });
 });
@@ -130,6 +156,7 @@ describe("type symbols", () => {
   it("infers symbols from type code letters", () => {
     expect(getTypeSymbolsFromCode("TDGL")).toBe("● ◯ ● ◯");
     expect(getTypeSymbolsFromCode("BHPV")).toBe("◐ ◐ ◐ ◐");
+    expect(getTypeSymbolsFromCode("smoke")).toBe("◐ ◐ ● ●");
   });
 });
 

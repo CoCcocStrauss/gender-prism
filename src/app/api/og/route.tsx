@@ -59,7 +59,7 @@ export function GET() {
             color: "#8a8a8a",
           }}
         >
-          四个维度，十六种类型。不是测你&apos;是&apos;什么性别——而是测你如何&apos;做&apos;你的性别。
+          四个维度，十六种类型。你是如何&apos;做&apos;你的性别的？
         </div>
       </div>
     ),
