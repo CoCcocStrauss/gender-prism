@@ -305,21 +305,27 @@ function ScoreSliderRow({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="grid grid-cols-[20px_1fr_20px_40px] items-center gap-2">
-      <span className="text-[14px] font-medium text-[#1a1a1a]">{left}</span>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={5}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="score-slider w-full"
-        style={{ background: gradient }}
-        aria-label={`${left} 到 ${right} 维度分数`}
-      />
-      <span className="text-right text-[14px] font-medium text-[#1a1a1a]">{right}</span>
-      <span className="text-right text-[14px] text-[#8a8a8a]">{value}%</span>
+    <div className="grid grid-cols-[24px_1fr_24px_48px] items-center gap-3">
+      <span className="text-[16px] font-medium leading-none text-[#1a1a1a]">{left}</span>
+      <div className="flex h-[14px] items-center">
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={value}
+          onChange={(event) => onChange(Number(event.target.value))}
+          className="score-slider"
+          style={{ "--slider-gradient": gradient } as React.CSSProperties}
+          aria-label={`${left} 到 ${right} 维度分数`}
+        />
+      </div>
+      <span className="text-right text-[16px] font-medium leading-none text-[#1a1a1a]">
+        {right}
+      </span>
+      <span className="text-right text-[14px] leading-none text-[#8a8a8a]">
+        {Math.round(value)}%
+      </span>
     </div>
   );
 }

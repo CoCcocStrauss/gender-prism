@@ -99,6 +99,10 @@ export default function CollectionPage() {
           </div>
         )}
       </div>
+
+      <p className="mt-10 text-center text-[12px] leading-[1.6] text-[#aaaaaa]">
+        你的棱镜集保存在当前浏览器中。更换浏览器或清除数据后将无法恢复。
+      </p>
     </main>
   );
 }
