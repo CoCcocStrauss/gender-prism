@@ -1,53 +1,46 @@
 "use client";
 
-import { genderTypes, type GenderType, type TypeQuote } from "@/data/types";
-import {
-  DIMENSION_GRADIENTS,
-  type PrismDimension,
-  type PrismScores,
-  getDimensionColor,
-  getPersonalPrismColor,
-} from "@/lib/prismColor";
-import { getTypeSymbols, getTypeSymbolsFromCode } from "@/lib/scoring";
+import { type GenderType, type TypeQuote } from "@/data/types";
+import { type ScoreDimension, type Scores } from "@/lib/scoring";
 import html2canvas from "html2canvas";
 import { QRCodeSVG } from "qrcode.react";
 import type { RefObject } from "react";
 
 type ShareCardProps = {
   type: GenderType;
-  scores?: PrismScores | null;
+  scores?: Scores | null;
   hidden?: boolean;
 };
 
 const coordinateMeta: {
-  dimension: PrismDimension;
+  dimension: ScoreDimension;
   left: string;
   right: string;
   description: string;
 }[] = [
   {
-    dimension: "tw",
-    left: "T",
-    right: "W",
-    description: "关系取向：独立行动 ↔ 寻求共振",
+    dimension: "s",
+    left: "s",
+    right: "S",
+    description: "性别感知",
   },
   {
-    dimension: "rd",
-    left: "R",
+    dimension: "r",
+    left: "r",
+    right: "R",
+    description: "性别反思",
+  },
+  {
+    dimension: "d",
+    left: "d",
     right: "D",
-    description: "规范张力：和谐 ↔ 摩擦",
+    description: "淡化 ↔ 强化",
   },
   {
-    dimension: "gf",
-    left: "G",
-    right: "F",
-    description: "性别显著性：背景 ↔ 前景",
-  },
-  {
-    dimension: "ml",
-    left: "M",
-    right: "L",
-    description: "表达变化：多面折射 ↔ 始终如一",
+    dimension: "c",
+    left: "c",
+    right: "C",
+    description: "跨场合一致性",
   },
 ];
 
@@ -118,12 +111,11 @@ function ShareCardLayout({
   scores,
 }: {
   type: GenderType;
-  scores?: PrismScores | null;
+  scores?: Scores | null;
 }) {
-  const prismColor = scores ? getPersonalPrismColor(scores) : type.hex;
-  const symbols = scores ? getTypeSymbols(scores) : getTypeSymbolsFromCode(type.code);
+  const prismColor = type.hex;
+  const displayedScores = scores ?? getDefaultScoresFromCode(type.code);
   const quote = type.quote;
-  const typeByCode = new Map(genderTypes.map((item) => [item.code, item]));
 
   return (
     <article
@@ -136,50 +128,41 @@ function ShareCardLayout({
         paddingBottom: 60,
       }}
     >
-      <p className="font-serif-display text-[24px] italic leading-none text-[#8a8a8a]">
+      <p className="font-serif-display text-[44px] italic leading-none text-[#8a8a8a]">
         Gender Prism
       </p>
 
-      <div style={{ height: 36 }} />
+      <div style={{ height: 60 }} />
 
       <div
         className="rounded-full"
         style={{
-          width: 140,
-          height: 140,
+          width: 168,
+          height: 168,
           backgroundColor: prismColor,
           border: isLowContrastOnPaper(prismColor) ? "1px solid #e8e8e4" : "none",
         }}
       />
 
-      <div style={{ height: 20 }} />
+      <div style={{ height: 22 }} />
 
-      <h1 className="text-[32px] font-light leading-none tracking-[-0.02em] text-[#1a1a1a]">
+      <h1 className="text-[66px] font-extralight leading-[1.08] tracking-[-0.04em] text-[#1a1a1a]">
         {type.nameZh}
       </h1>
 
-      <div style={{ height: 6 }} />
+      <div style={{ height: 24 }} />
 
-      <p className="font-serif-display text-[18px] italic leading-none text-[#8a8a8a]">
+      <p className="font-serif-display text-[36px] italic leading-none text-[#8a8a8a]">
         {type.nameEn}
       </p>
 
-      <div style={{ height: 6 }} />
+      <div style={{ height: 72 }} />
 
-      <p className="text-[14px] leading-none tracking-[0.3em] text-[#8a8a8a]">
-        {symbols}
-      </p>
-
-      <div style={{ height: 32 }} />
-
-      <div className="flex w-[700px] flex-col gap-5">
+      <div className="flex w-[850px] flex-col gap-7">
         {coordinateMeta.map((item) => (
           <MiniCoordinateLine
             key={item.dimension}
-            dimension={item.dimension}
-            score={
-              scores?.[item.dimension] ?? getDefaultPosition(type.code, item.dimension)
-            }
+            score={displayedScores[item.dimension]}
             left={item.left}
             right={item.right}
             description={item.description}
@@ -187,83 +170,36 @@ function ShareCardLayout({
         ))}
       </div>
 
-      <div style={{ height: 32 }} />
+      <div style={{ height: 68 }} />
 
       <Divider />
 
-      <div style={{ height: 24 }} />
+      <div style={{ height: 44 }} />
 
-      <p className="max-w-[75%] whitespace-pre-line text-center text-[16px] leading-[1.7] text-[#1a1a1a]">
+      <p className="max-w-[85%] whitespace-pre-line text-center text-[30px] leading-[1.6] text-[#1a1a1a]">
         {type.portrait}
       </p>
 
-      <div style={{ height: 32 }} />
+      <div style={{ height: 68 }} />
 
       <Divider />
 
-      <div style={{ height: 24 }} />
-
-      <p className="text-[14px] leading-none text-[#8a8a8a]">你与系统</p>
-
-      <div style={{ height: 12 }} />
-
-      <p className="max-w-[75%] text-center text-[15px] leading-[1.6] text-[#1a1a1a]">
-        {type.systemInsight}
-      </p>
-
-      <div style={{ height: 32 }} />
-
-      <Divider />
-
-      <div style={{ height: 24 }} />
-
-      <p className="text-[14px] leading-none text-[#8a8a8a]">对话地图</p>
-
-      <div style={{ height: 16 }} />
-
-      <div className="flex max-w-[75%] flex-col gap-4 text-left">
-        {type.dialogues.map((dialogue) => {
-          const withType = typeByCode.get(dialogue.withCode);
-
-          return (
-            <div
-              key={dialogue.withCode}
-              className="text-[14px] leading-[1.5] text-[#1a1a1a]"
-            >
-              <span
-                aria-hidden="true"
-                className="mr-2 inline-block h-2 w-2 rounded-full align-middle"
-                style={{ backgroundColor: withType?.hex ?? "#8a8a8a" }}
-              />
-              <span className="font-medium">
-                {withType?.nameZh ?? dialogue.withCode}
-              </span>
-              <span>：{dialogue.description}</span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{ height: 32 }} />
-
-      <Divider />
-
-      <div style={{ height: 20 }} />
+      <div style={{ height: 44 }} />
 
       <ShareCardQuote quote={quote} />
 
-      <div style={{ height: 40 }} />
+      <div style={{ height: 72 }} />
 
       <QRCodeSVG
         value={qrCodeUrl}
-        size={120}
+        size={180}
         fgColor="#1a1a1a"
         bgColor="transparent"
       />
 
-      <div style={{ height: 16 }} />
+      <div style={{ height: 28 }} />
 
-      <p className="text-[14px] leading-none text-[#8a8a8a]">
+      <p className="text-[24px] leading-none text-[#8a8a8a]">
         扫码测试你的性别棱镜
       </p>
     </article>
@@ -277,102 +213,97 @@ function Divider() {
 function ShareCardQuote({ quote }: { quote: TypeQuote }) {
   if (quote.translation) {
     return (
-      <div className="max-w-[75%] text-center">
-        <p className="font-serif-display text-[14px] italic leading-[1.55] text-[#8a8a8a]">
+      <div className="max-w-[85%] text-center">
+        <p className="font-serif-display text-[30px] italic leading-[1.5] text-[#8a8a8a]">
           {quote.original}
         </p>
-        <div style={{ height: 4 }} />
-        <p className="text-[16px] leading-[1.55] text-[#1a1a1a]">
+        <div style={{ height: 12 }} />
+        <p className="text-[36px] leading-[1.5] text-[#1a1a1a]">
           {quote.translation}
         </p>
-        <div style={{ height: 6 }} />
-        <p className="text-[12px] leading-none text-[#8a8a8a]">{quote.source}</p>
+        <div style={{ height: 16 }} />
+        <p className="text-[22px] leading-none text-[#8a8a8a]">{quote.source}</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-[75%] text-center">
-      <p className="font-serif-display text-[16px] italic leading-[1.55] text-[#1a1a1a]">
+    <div className="max-w-[85%] text-center">
+      <p className="font-serif-display text-[30px] italic leading-[1.5] text-[#1a1a1a]">
         {quote.original}
       </p>
-      <div style={{ height: 6 }} />
-      <p className="text-[12px] leading-none text-[#8a8a8a]">{quote.source}</p>
+      <div style={{ height: 16 }} />
+      <p className="text-[22px] leading-none text-[#8a8a8a]">{quote.source}</p>
     </div>
   );
 }
 
 function MiniCoordinateLine({
-  dimension,
   score,
   left,
   right,
   description,
 }: {
-  dimension: PrismDimension;
   score: number;
   left: string;
   right: string;
   description: string;
 }) {
-  const gradient = DIMENSION_GRADIENTS[dimension];
   const position = clampScore(score);
 
   return (
     <div>
-      <div className="grid grid-cols-[36px_1fr_36px] items-center gap-4">
-        <span className="text-[14px] leading-none text-[#8a8a8a]">{left}</span>
-        <div className="relative h-[14px]">
+      <div className="grid grid-cols-[52px_1fr_52px_78px] gap-x-5">
+        <p className="col-start-2 text-center text-[22px] leading-none text-[#8a8a8a]">
+          {description}
+        </p>
+      </div>
+      <div className="mt-[20px] grid grid-cols-[52px_1fr_52px_78px] items-center gap-5">
+        <span className="text-[28px] font-medium leading-none text-[#1a1a1a]">
+          {left}
+        </span>
+        <div className="relative h-[18px]">
           <div
             className="absolute left-0 top-1/2 w-full -translate-y-1/2"
             style={{
-              height: 3,
-              background: `linear-gradient(90deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+              height: 4,
+              background: "linear-gradient(90deg, #e8e8e4 0%, #8a8a8a 100%)",
             }}
           />
           <span
-            className="absolute top-1/2 h-[14px] w-[14px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute top-1/2 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               left: `${position}%`,
-              backgroundColor: getDimensionColor(dimension, position),
+              backgroundColor: "#1a1a1a",
             }}
           />
         </div>
-        <span className="text-[14px] leading-none text-[#8a8a8a]">{right}</span>
+        <span className="text-right text-[28px] font-medium leading-none text-[#1a1a1a]">
+          {right}
+        </span>
+        <span className="text-right text-[24px] leading-none text-[#8a8a8a]">
+          {Math.round(position)}%
+        </span>
       </div>
-      <p className="mt-1.5 text-center text-[12px] leading-none text-[#aaaaaa]">
-        {description}
-      </p>
     </div>
   );
 }
 
-function getDefaultPosition(code: string, dimension: PrismDimension): number {
-  const indexByDimension: Record<PrismDimension, number> = {
-    tw: 0,
-    rd: 1,
-    gf: 2,
-    ml: 3,
+function getDefaultScoresFromCode(code: string): Scores {
+  return {
+    s: getDefaultPosition(code[0], "s", "S"),
+    r: getDefaultPosition(code[1], "r", "R"),
+    d: getDefaultPosition(code[2], "d", "D"),
+    c: getDefaultPosition(code[3], "c", "C"),
   };
-  const lowByDimension: Record<PrismDimension, string> = {
-    tw: "T",
-    rd: "R",
-    gf: "G",
-    ml: "M",
-  };
-  const highByDimension: Record<PrismDimension, string> = {
-    tw: "W",
-    rd: "D",
-    gf: "F",
-    ml: "L",
-  };
-  const letter = code[indexByDimension[dimension]];
+}
 
-  if (letter === lowByDimension[dimension]) {
+function getDefaultPosition(letter: string | undefined, low: string, high: string) {
+  if (letter === low) {
     return 25;
   }
 
-  if (letter === highByDimension[dimension]) {
+  if (letter === high) {
     return 75;
   }
 

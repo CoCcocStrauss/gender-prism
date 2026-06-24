@@ -214,46 +214,38 @@ export default function TestPage() {
         initial={shouldReduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="min-h-screen bg-[#FAFAF8] px-6 text-foreground"
+        className="h-[100dvh] snap-y snap-mandatory overflow-y-scroll bg-[#FAFAF8] px-6 text-foreground"
       >
-        <section className="mx-auto max-w-[640px] pb-14 pt-12 sm:pb-[60px] sm:pt-[60px]">
+        <section className="mx-auto flex min-h-[100dvh] max-w-[640px] snap-start flex-col justify-center px-5 py-10">
           <p className="font-serif-display text-[20px] italic leading-none sm:text-[24px]">
             Before You Begin
           </p>
 
           <div className="mt-8 space-y-6 text-[15px] leading-[1.8] text-[#1a1a1a] sm:text-base">
             <p>
-              这不是一个测试你「是男是女」或者「有多男性化多女性化」的工具。
+              性别是人类社会最古老的分类系统之一。从你出生那一刻起，它就在影响你如何被对待、如何被期待、如何理解自己和他人。
             </p>
             <p>
-              性别是人类社会最古老的分类系统之一。从你出生的那一刻起，这个系统就已经在运作了——它影响你如何被对待、如何被期待、如何理解自己和他人。
+              我们不关心系统给你贴了什么标签。我们关心的是你和这个系统之间的互动方式。
             </p>
             <p>
-              我们关心的不是这个系统给你贴了什么标签。我们关心的是你和这个系统之间的互动方式。
-            </p>
-            <p>
-              比如：当一个陌生人走进房间时，你会在多快的时间内注意到他们的性别？你是否曾经意识到自己的某个习惯其实来自性别规范？你的存在是让周围的性别氛围变得更浓，还是更淡？你在不同的场合里，是同一个你吗？
-            </p>
-            <p>
-              这些问题没有正确答案。每种互动模式都有它的逻辑和来源。我们不会告诉你哪种模式更好或更进步。
+              这些问题没有正确答案，每种模式都有它的逻辑和来源。
             </p>
           </div>
+        </section>
 
-          <div className="mt-10 h-px w-full bg-border sm:mt-12" />
-
-          <section className="mt-6">
-            <h2 className="text-sm font-normal tracking-widest text-[#8a8a8a]">
-              HOW IT WORKS
-            </h2>
-            <div className="mt-4 space-y-4 text-[15px] leading-[1.8] text-[#1a1a1a] sm:text-base">
-              <p>接下来你将回答 72 道题目。每道题使用 1-5 分量表：</p>
-              <p>1 = 完全不符合&nbsp;&nbsp;&nbsp;&nbsp;5 = 完全符合</p>
-              <p>
-                请尽量按照第一直觉回答。如果实在不确定，可以选 3（中立），但尽量少选——你的倾向比你以为的更清晰。
-              </p>
-              <p>测试大约需要 10 分钟。</p>
-            </div>
-          </section>
+        <section className="mx-auto flex min-h-[100dvh] max-w-[640px] snap-start flex-col justify-center px-5 py-10">
+          <h2 className="font-serif-display text-[20px] italic leading-none sm:text-[24px]">
+            HOW IT WORKS
+          </h2>
+          <div className="mt-4 space-y-4 text-[15px] leading-[1.8] text-[#1a1a1a] sm:text-base">
+            <p>接下来你将回答 66 道题目。每道题使用 1-5 分量表：</p>
+            <p>1 = 完全不符合&nbsp;&nbsp;&nbsp;&nbsp;5 = 完全符合</p>
+            <p>
+              请尽量按照第一直觉回答。如果实在不确定，可以选 3（中立），但尽量少选。
+            </p>
+            <p>测试大约需要 10 分钟。</p>
+          </div>
 
           <div className="mt-10 sm:mt-12">
             <button
@@ -263,9 +255,6 @@ export default function TestPage() {
             >
               开始测试 →
             </button>
-            <p className="mt-4 text-[13px] leading-6 text-[#8a8a8a]">
-              结果是一张快照——下次做，你的颜色可能不同。
-            </p>
           </div>
         </section>
       </motion.main>

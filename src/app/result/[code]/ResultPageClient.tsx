@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  formatTypeQuoteForCopy,
-  type GenderType,
-  type TypeQuote,
-} from "@/data/types";
-import type { PrismScores } from "@/lib/prismColor";
+import { type GenderType, type TypeQuote } from "@/data/types";
 import { type ScoreDimension, type Scores } from "@/lib/scoring";
 import { ShareCard, useShareCard } from "@/components/ShareCard";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -24,48 +19,45 @@ type ResultPageClientProps = {
   resultCode: string;
 };
 
-type SectionKey = "system" | "dialogues";
-
 const coordinateMeta: {
   dimension: ScoreDimension;
   left: string;
   right: string;
-  explanation: string;
+  description: string;
 }[] = [
   {
     dimension: "s",
     left: "s",
     right: "S",
-    explanation: "你的认知在多大程度上自动地使用性别作为理解世界的框架。",
+    description: "性别感知",
   },
   {
     dimension: "r",
     left: "r",
     right: "R",
-    explanation: "你在多大程度上意识到性别系统在你身上和你周围的运作方式。",
+    description: "性别反思",
   },
   {
     dimension: "d",
     left: "d",
     right: "D",
-    explanation: "你的存在和行为倾向于在互动中让性别变得更显著，还是更不显著。",
+    description: "淡化 ↔ 强化",
   },
   {
     dimension: "c",
     left: "c",
     right: "C",
-    explanation: "你的性别表达在不同的社会场合中呈现出多大程度的一致性。",
+    description: "跨场合一致性",
   },
 ];
 
 export function ResultPageClient({
   type,
-  allTypes,
+  resultCode,
 }: ResultPageClientProps) {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [scores, setScores] = useState<Scores | null>(null);
-  const [openSection, setOpenSection] = useState<SectionKey | null>(null);
-  const [copied, setCopied] = useState<"tagline" | "link" | null>(null);
+  const [copied, setCopied] = useState<"link" | null>(null);
   const [sharePreviewUrl, setSharePreviewUrl] = useState<string | null>(null);
   const shareCardRef = useRef<HTMLDivElement | null>(null);
 
@@ -101,16 +93,10 @@ export function ResultPageClient({
   const prismColor = type.hex;
   const circleNeedsBorder = isLowContrastOnPaper(prismColor);
   const quote = type.quote;
-  const copyQuoteText = formatTypeQuoteForCopy(quote);
   const srCouplingText = scores ? getSrCouplingText(scores) : null;
-  const shareScores = scores ? toShareCardScores(scores) : null;
-  const dialogueTypeByCode = useMemo(
-    () => new Map(allTypes.map((item) => [item.code, item])),
-    [allTypes],
-  );
   const { createCardBlob, downloadCard } = useShareCard(shareCardRef, type.code);
 
-  const copyText = async (text: string, copiedKey: "tagline" | "link") => {
+  const copyText = async (text: string, copiedKey: "link") => {
     await navigator.clipboard.writeText(text);
     setCopied(copiedKey);
   };
@@ -151,8 +137,15 @@ export function ResultPageClient({
   }, [sharePreviewUrl]);
 
   return (
-    <main className="min-h-screen bg-background px-6 text-foreground">
-      <section className="mx-auto flex min-h-screen max-w-[640px] flex-col items-center pt-20 text-center">
+    <main className="h-[100dvh] snap-y snap-mandatory overflow-y-scroll bg-background px-6 text-foreground">
+      <section className="relative mx-auto flex min-h-[100dvh] max-w-[640px] snap-start flex-col justify-center px-5 py-10">
+        <Link
+          href={`/about?from=${encodeURIComponent(`/result/${resultCode}`)}`}
+          className="absolute right-5 top-6 max-w-[160px] text-right text-[12px] leading-[1.5] text-muted underline-offset-4 transition-colors duration-200 hover:text-foreground hover:underline"
+        >
+          点击查看维度分类的学术基础
+        </Link>
+        <div className="flex flex-col items-center text-center">
         <motion.p
           initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -166,7 +159,7 @@ export function ResultPageClient({
           initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: "easeOut" }}
-          className="mt-6 h-24 w-24 rounded-full sm:h-[120px] sm:w-[120px]"
+          className="mt-3 h-16 w-16 rounded-full sm:h-20 sm:w-20"
           style={{
             backgroundColor: prismColor,
             border: circleNeedsBorder ? "1px solid #e8e8e4" : "none",
@@ -182,15 +175,54 @@ export function ResultPageClient({
             ease: "easeOut",
             delay: shouldReduceMotion ? 0 : 0.3,
           }}
-          className="mt-6"
+          className="mt-3"
         >
           <h1 className="text-[22px] font-light leading-[1.3] tracking-[-0.02em] sm:text-2xl">
             {type.nameZh}
           </h1>
-          <p className="mt-2 font-serif-display text-base italic leading-none text-muted">
+          <p className="mt-1.5 font-serif-display text-base italic leading-none text-muted">
             {type.nameEn}
           </p>
         </motion.div>
+        </div>
+
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.4,
+            ease: "easeOut",
+            delay: shouldReduceMotion ? 0 : 0.5,
+          }}
+          className="mt-5"
+        >
+          <h2 className="text-sm font-normal uppercase tracking-[0.15em] text-muted">
+            YOUR COORDINATES
+          </h2>
+          <div className="mt-4 space-y-4">
+            {coordinateMeta.map((item) => (
+              <CoordinateLine
+                key={item.dimension}
+                score={displayedScores[item.dimension]}
+                left={item.left}
+                right={item.right}
+                description={item.description}
+              />
+            ))}
+          </div>
+
+          {srCouplingText ? (
+            <div className="mt-6">
+              <h2 className="text-xs font-normal tracking-widest text-[#aaaaaa]">
+                S-R COUPLING
+              </h2>
+              <p className="mt-3 text-[13px] leading-[1.6] text-[#8a8a8a]">
+                {srCouplingText}
+              </p>
+            </div>
+          ) : null}
+        </motion.div>
+
       </section>
 
       <motion.div
@@ -203,35 +235,7 @@ export function ResultPageClient({
         }}
         className="mx-auto max-w-[640px]"
       >
-        <section className="pb-16">
-          <h2 className="text-sm font-normal uppercase tracking-[0.15em] text-muted">
-            YOUR COORDINATES
-          </h2>
-          <div className="mt-6 space-y-7">
-            {coordinateMeta.map((item) => (
-              <CoordinateLine
-                key={item.dimension}
-                score={displayedScores[item.dimension]}
-                left={item.left}
-                right={item.right}
-                explanation={item.explanation}
-              />
-            ))}
-          </div>
-        </section>
-
-        {srCouplingText ? (
-          <section className="pb-12">
-            <h2 className="text-xs font-normal tracking-widest text-[#aaaaaa]">
-              S-R COUPLING
-            </h2>
-            <p className="mt-3 text-[13px] leading-[1.6] text-[#8a8a8a]">
-              {srCouplingText}
-            </p>
-          </section>
-        ) : null}
-
-        <section className="pb-12">
+        <section className="snap-start px-5 py-10 sm:flex sm:min-h-[100dvh] sm:flex-col sm:justify-center">
           {splitPortrait(type.portrait).map((paragraph) => (
             <p
               key={paragraph}
@@ -240,100 +244,62 @@ export function ResultPageClient({
               {paragraph}
             </p>
           ))}
-        </section>
 
-        <section className="border-t border-border pb-12 pt-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="mt-8 border-t border-border pt-6">
             <TypeQuoteBlock quote={quote} />
-            <button
-              type="button"
-              onClick={() => copyText(copyQuoteText, "tagline")}
-              className="inline-flex min-h-11 shrink-0 items-center text-left text-sm leading-6 text-foreground underline-offset-4 transition-colors duration-200 hover:text-muted hover:underline"
-            >
-              {copied === "tagline" ? "已复制" : "复制"}
-            </button>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={saveShareCard}
+                className="rounded-lg bg-accent px-7 py-3.5 text-sm font-medium leading-none text-background transition-opacity duration-200 hover:opacity-85"
+              >
+                保存棱镜卡
+              </button>
+              <button
+                type="button"
+                onClick={() => copyText(window.location.href, "link")}
+                className="inline-flex min-h-11 items-center justify-center text-sm leading-6 text-foreground underline-offset-4 transition-colors duration-200 hover:text-muted hover:underline"
+              >
+                {copied === "link" ? "链接已复制" : "复制链接"}
+              </button>
+            </div>
+
+            <footer className="mt-5 text-center">
+              <p className="mx-auto max-w-[520px] text-[13px] leading-[1.7] text-muted">
+                本测试为自我探索工具。你的颜色会随着生活经历而微妙变化，这完全正常。
+              </p>
+              <Link
+                href="/disclaimer"
+                className="mt-2 inline-flex min-h-11 items-center text-[13px] leading-6 text-foreground underline-offset-4 transition-colors duration-200 hover:text-muted hover:underline"
+              >
+                免责声明
+              </Link>
+            </footer>
           </div>
         </section>
 
-        <section className="pb-12">
+        <div className="hidden">
           <AccordionItem
             title="你与系统"
-            open={openSection === "system"}
-            onToggle={() =>
-              setOpenSection((section) => (section === "system" ? null : "system"))
-            }
+            open={false}
+            onToggle={() => undefined}
             shouldReduceMotion={shouldReduceMotion}
           >
             <p>{type.systemInsight}</p>
           </AccordionItem>
-
           <AccordionItem
             title="对话地图"
-            open={openSection === "dialogues"}
-            onToggle={() =>
-              setOpenSection((section) =>
-                section === "dialogues" ? null : "dialogues",
-              )
-            }
+            open={false}
+            onToggle={() => undefined}
             shouldReduceMotion={shouldReduceMotion}
           >
-            <div className="space-y-5">
-              {type.dialogues.map((dialogue) => {
-                const withType = dialogueTypeByCode.get(dialogue.withCode);
-
-                return (
-                  <div key={dialogue.withCode} className="flex gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="mt-[0.62em] h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: withType?.hex ?? "#8a8a8a" }}
-                    />
-                    <p>
-                      <span className="text-foreground">
-                        {withType?.nameZh ?? dialogue.withCode}
-                      </span>
-                      ：{dialogue.description}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+            <div />
           </AccordionItem>
-        </section>
-
-        <section className="border-t border-border pb-12 pt-6">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="button"
-              onClick={saveShareCard}
-              className="rounded-lg bg-accent px-7 py-3.5 text-sm font-medium leading-none text-background transition-opacity duration-200 hover:opacity-85"
-            >
-              保存棱镜卡
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={() => copyText(window.location.href, "link")}
-            className="mt-4 inline-flex min-h-11 items-center text-sm leading-6 text-foreground underline-offset-4 transition-colors duration-200 hover:text-muted hover:underline"
-          >
-            {copied === "link" ? "链接已复制" : "复制链接"}
-          </button>
-        </section>
-
-        <footer className="pb-20 text-center">
-          <p className="mx-auto max-w-[520px] text-[13px] leading-[1.8] text-muted">
-            本测试为自我探索工具。你的颜色会随着生活经历而微妙变化——这完全正常。
-          </p>
-          <Link
-            href="/disclaimer"
-            className="mt-3 inline-flex min-h-11 items-center text-[13px] leading-6 text-foreground underline-offset-4 transition-colors duration-200 hover:text-muted hover:underline"
-          >
-            免责声明
-          </Link>
-        </footer>
+        </div>
       </motion.div>
       <div ref={shareCardRef}>
-        <ShareCard type={type} scores={shareScores} />
+        <ShareCard type={type} scores={displayedScores} />
       </div>
       {sharePreviewUrl ? (
         <ShareCardPreviewOverlay
@@ -374,7 +340,7 @@ function ShareCardPreviewOverlay({
           width={1080}
           height={2400}
           unoptimized
-          className="h-auto w-[90vw] max-w-none"
+          className="h-auto w-[95vw] max-w-none"
         />
       </div>
     </div>
@@ -384,14 +350,14 @@ function ShareCardPreviewOverlay({
 function TypeQuoteBlock({ quote }: { quote: TypeQuote }) {
   if (quote.translation) {
     return (
-      <div className="text-center sm:flex-1">
-        <p className="font-serif-display text-base italic leading-[1.7] text-[#8a8a8a]">
+      <div className="text-center">
+        <p className="font-serif-display text-[15px] italic leading-[1.55] text-[#8a8a8a]">
           {quote.original}
         </p>
-        <p className="mt-1 text-lg font-light leading-[1.7] text-[#1a1a1a]">
+        <p className="mt-1 text-[17px] font-light leading-[1.55] text-[#1a1a1a]">
           {quote.translation}
         </p>
-        <p className="mt-2 text-[13px] leading-6 text-[#8a8a8a]">
+        <p className="mt-2 text-[12px] leading-5 text-[#8a8a8a]">
           {quote.source}
         </p>
       </div>
@@ -399,11 +365,11 @@ function TypeQuoteBlock({ quote }: { quote: TypeQuote }) {
   }
 
   return (
-    <div className="text-center sm:flex-1">
-      <p className="font-serif-display text-lg italic leading-[1.7] text-[#1a1a1a]">
+    <div className="text-center">
+      <p className="font-serif-display text-[17px] italic leading-[1.55] text-[#1a1a1a]">
         {quote.original}
       </p>
-      <p className="mt-2 text-[13px] leading-6 text-[#8a8a8a]">
+      <p className="mt-2 text-[12px] leading-5 text-[#8a8a8a]">
         {quote.source}
       </p>
     </div>
@@ -414,44 +380,48 @@ function CoordinateLine({
   score,
   left,
   right,
-  explanation,
+  description,
 }: {
   score: number;
   left: string;
   right: string;
-  explanation: string;
+  description: string;
 }) {
   const position = clampScore(score);
 
   return (
-    <div className="grid grid-cols-2 gap-x-4 sm:grid-cols-[52px_1fr_52px_56px]">
-      <span className="self-center text-sm leading-6 text-muted">{left}</span>
-      <span className="self-center text-right text-sm leading-6 text-muted sm:col-start-3">
-        {right}
-      </span>
-      <div className="relative col-span-2 mt-1 h-11 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:mt-0">
+    <div>
+      <p className="text-center text-[13px] leading-none text-[#8a8a8a]">
+        {description}
+      </p>
+      <div className="mt-[6px] grid grid-cols-[24px_1fr_24px_48px] items-center gap-3">
+        <span className="text-[16px] font-medium leading-none text-[#1a1a1a]">
+          {left}
+        </span>
+        <div className="relative h-[14px]">
         <div
           className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2"
           style={{
-            height: "2px",
+            height: "3px",
             background: "linear-gradient(90deg, #e8e8e4 0%, #8a8a8a 100%)",
           }}
         />
         <span
           aria-hidden="true"
-          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          className="absolute top-1/2 h-[14px] w-[14px] -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{
             left: `${position}%`,
             backgroundColor: "#1a1a1a",
           }}
         />
+        </div>
+        <span className="text-right text-[16px] font-medium leading-none text-[#1a1a1a]">
+          {right}
+        </span>
+        <span className="text-right text-[14px] leading-none text-[#8a8a8a]">
+          {Math.round(position)}%
+        </span>
       </div>
-      <span className="col-span-2 text-right text-[13px] leading-6 text-[#8a8a8a] sm:col-span-1 sm:col-start-4 sm:row-start-1 sm:self-center">
-        {Math.round(position)}/100
-      </span>
-      <p className="col-span-2 mt-2 text-[13px] leading-[1.4] text-[#aaaaaa] sm:col-span-2 sm:col-start-2">
-        {explanation}
-      </p>
     </div>
   );
 }
@@ -556,15 +526,6 @@ function getDefaultPosition(letter: string | undefined, low: string, high: strin
   }
 
   return 50;
-}
-
-function toShareCardScores(scores: Scores): PrismScores {
-  return {
-    tw: scores.s,
-    rd: scores.r,
-    gf: scores.d,
-    ml: scores.c,
-  };
 }
 
 function getSrCouplingText(scores: Scores): string | null {

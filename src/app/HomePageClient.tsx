@@ -26,9 +26,9 @@ export function HomePageClient() {
       initial={shouldReduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="min-h-screen bg-background px-6 text-foreground"
+      className="h-[100dvh] snap-y snap-mandatory overflow-y-scroll bg-background px-6 text-foreground"
     >
-      <section className="mx-auto flex min-h-screen max-w-[680px] flex-col justify-center py-24">
+      <section className="mx-auto flex min-h-[100dvh] max-w-[680px] snap-start flex-col justify-center px-5 py-10">
         <p className="font-serif-display text-xl italic leading-none text-foreground">
           Gender Prism
         </p>
@@ -51,7 +51,7 @@ export function HomePageClient() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[680px] border-t border-border py-24 sm:py-28">
+      <section className="mx-auto flex min-h-[100dvh] max-w-[680px] snap-start flex-col justify-center border-t border-border px-5 py-10">
         <div>
           <h2 className="text-[32px] font-light leading-[1.3] tracking-[-0.03em] text-foreground sm:text-4xl">
             这不是又一个性别测试
@@ -70,9 +70,7 @@ export function HomePageClient() {
             ))}
           </div>
         </div>
-      </section>
-
-      <footer className="mx-auto max-w-[680px] border-t border-border py-10">
+        <footer className="mt-16 border-t border-border pt-10">
         <div className="flex gap-6 text-[13px] leading-6 text-muted">
           <Link
             href="/about"
@@ -89,6 +87,7 @@ export function HomePageClient() {
         </div>
         <p className="mt-10 text-xs leading-6 text-muted">© Gender Prism 2026</p>
       </footer>
+      </section>
     </motion.main>
   );
 }
