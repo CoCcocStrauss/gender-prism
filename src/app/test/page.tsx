@@ -232,19 +232,16 @@ export default function TestPage() {
               这些问题没有正确答案，每种模式都有它的逻辑和来源。
             </p>
           </div>
-        </section>
 
-        <section className="mx-auto flex min-h-[100dvh] max-w-[640px] snap-start flex-col justify-center px-5 py-10">
-          <h2 className="font-serif-display text-[20px] italic leading-none sm:text-[24px]">
-            HOW IT WORKS
+          <h2 className="mt-10 font-serif-display text-[20px] italic leading-none sm:text-[24px]">
+            How It Works
           </h2>
           <div className="mt-4 space-y-4 text-[15px] leading-[1.8] text-[#1a1a1a] sm:text-base">
             <p>接下来你将回答 66 道题目。每道题使用 1-5 分量表：</p>
             <p>1 = 完全不符合&nbsp;&nbsp;&nbsp;&nbsp;5 = 完全符合</p>
             <p>
-              请尽量按照第一直觉回答。如果实在不确定，可以选 3（中立），但尽量少选。
+              请尽量按照第一直觉回答。如果实在不确定，可以选 3（中立），但尽量少选。测试大约需要 10 分钟。
             </p>
-            <p>测试大约需要 10 分钟。</p>
           </div>
 
           <div className="mt-10 sm:mt-12">
