@@ -6,6 +6,7 @@ import {
   getGenderTypeByCode,
   isFriendSaved,
   readCompareCache,
+  readScoresApproximate,
   readStoredScores,
   writeCompareCache,
   type StoredFriend,
@@ -59,12 +60,13 @@ function ComparePageContent() {
       const typeB = { nameZh: friendType.nameZh, code: friendType.code };
       const scoresA = readStoredScores() ?? getDefaultScoresFromTypeCode(meCode);
       const scoresB = getDefaultScoresFromTypeCode(friendCode);
+      const scoresApproximate = readScoresApproximate();
 
       try {
         const response = await fetch("/api/compare", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ typeA, typeB, scoresA, scoresB }),
+          body: JSON.stringify({ typeA, typeB, scoresA, scoresB, scoresApproximate }),
         });
 
         const { text } = (await response.json()) as { text?: string };

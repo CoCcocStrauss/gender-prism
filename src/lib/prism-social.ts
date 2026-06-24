@@ -28,6 +28,74 @@ export function getDefaultScoresFromTypeCode(code: string): Scores {
   };
 }
 
+export function getDefaultScoresForGenderType(type: GenderType): Scores {
+  if (type.code.length === 4 && !type.code.startsWith("HIDDEN_")) {
+    return getDefaultScoresFromTypeCode(type.code);
+  }
+
+  return { s: 50, r: 50, d: 50, c: 50 };
+}
+
+export function getPresetScoresFromTypeCode(code: string): Scores {
+  return {
+    s: code[0] === code[0]?.toUpperCase() ? 75 : 25,
+    r: code[1] === code[1]?.toUpperCase() ? 75 : 25,
+    d: code[2] === code[2]?.toUpperCase() ? 75 : 25,
+    c: code[3] === code[3]?.toUpperCase() ? 75 : 25,
+  };
+}
+
+export function getPresetScoresForGenderType(type: GenderType): Scores {
+  if (type.code.length === 4 && !type.code.startsWith("HIDDEN_")) {
+    return getPresetScoresFromTypeCode(type.code);
+  }
+
+  return { s: 50, r: 50, d: 50, c: 50 };
+}
+
+export function readScoresApproximate(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.localStorage.getItem("myScoresApproximate") === "true";
+}
+
+function normalizeSearchQuery(query: string): string {
+  return query.trim().toLowerCase();
+}
+
+function getSearchableNameEn(nameEn: string): string {
+  return nameEn.replace(/^The\s+/i, "").toLowerCase();
+}
+
+export function matchesGenderType(type: GenderType, query: string): boolean {
+  const trimmed = query.trim();
+
+  if (!trimmed) {
+    return false;
+  }
+
+  const normalized = normalizeSearchQuery(trimmed);
+
+  return (
+    type.nameZh.includes(trimmed) ||
+    type.code.toLowerCase().includes(normalized) ||
+    type.nameEn.toLowerCase().includes(normalized) ||
+    getSearchableNameEn(type.nameEn).includes(normalized)
+  );
+}
+
+export function searchGenderTypes(query: string, limit = 5): GenderType[] {
+  const trimmed = query.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  return genderTypes.filter((type) => matchesGenderType(type, trimmed)).slice(0, limit);
+}
+
 export function getCompareCacheKey(codeA: string, codeB: string): string {
   const [first, second] = [codeA, codeB].sort();
   return `compare_${first}_${second}`;

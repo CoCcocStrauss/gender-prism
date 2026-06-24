@@ -43,3 +43,35 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.score-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 9999px;
+  outline: none;
+}
+
+.score-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6.5px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  cursor: pointer;
+}
+
+.score-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: #1a1a1a;
+  cursor: pointer;
+}
+
+.score-slider::-moz-range-track {
+  height: 3px;
+  border-radius: 9999px;
+}

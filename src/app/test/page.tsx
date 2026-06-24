@@ -105,6 +105,7 @@ export default function TestPage() {
           window.sessionStorage.setItem("prismScores", JSON.stringify(scores));
           window.localStorage.setItem("myType", resultCode);
           window.localStorage.setItem("myScores", JSON.stringify(scores));
+          window.localStorage.removeItem("myScoresApproximate");
           console.log("[GenderPrism:test] storage written", {
             resultCode,
             scores,
