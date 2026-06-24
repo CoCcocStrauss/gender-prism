@@ -1,5 +1,5 @@
 import { genderTypes } from "@/data/types";
-import { getTypeQuote, getTypeQuotePreview } from "@/data/typeQuotes";
+import { getTypeQuotePreview } from "@/data/types";
 import { getResultTypeCodeFromCode } from "@/lib/scoring";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -15,8 +15,7 @@ export async function generateMetadata({
   params,
 }: ResultPageProps): Promise<Metadata> {
   const { code } = await params;
-  const resultCode = code.toUpperCase();
-  const canonicalCode = getResultTypeCodeFromCode(resultCode);
+  const canonicalCode = getResultTypeCodeFromCode(code);
   const type = genderTypes.find((item) => item.code === canonicalCode);
 
   if (!type) {
@@ -27,8 +26,7 @@ export async function generateMetadata({
 
   const title = `${type.nameZh} · ${type.nameEn} — Gender Prism`;
   const imageUrl = `/api/og/${type.code}`;
-  const quote = getTypeQuote(type.code);
-  const description = quote ? getTypeQuotePreview(quote) : type.tagline;
+  const description = getTypeQuotePreview(type.quote);
 
   return {
     title,
@@ -56,13 +54,12 @@ export async function generateMetadata({
 
 export default async function ResultPage({ params }: ResultPageProps) {
   const { code } = await params;
-  const resultCode = code.toUpperCase();
-  const canonicalCode = getResultTypeCodeFromCode(resultCode);
+  const canonicalCode = getResultTypeCodeFromCode(code);
   const type = genderTypes.find((item) => item.code === canonicalCode);
 
   if (!type) {
     notFound();
   }
 
-  return <ResultPageClient type={type} allTypes={genderTypes} resultCode={resultCode} />;
+  return <ResultPageClient type={type} allTypes={genderTypes} resultCode={canonicalCode} />;
 }

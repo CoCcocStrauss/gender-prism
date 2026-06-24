@@ -1,7 +1,6 @@
 "use client";
 
-import { genderTypes, type GenderType } from "@/data/types";
-import { getTypeQuote, type TypeQuote } from "@/data/typeQuotes";
+import { genderTypes, type GenderType, type TypeQuote } from "@/data/types";
 import {
   DIMENSION_GRADIENTS,
   type PrismDimension,
@@ -123,7 +122,7 @@ function ShareCardLayout({
 }) {
   const prismColor = scores ? getPersonalPrismColor(scores) : type.hex;
   const symbols = scores ? getTypeSymbols(scores) : getTypeSymbolsFromCode(type.code);
-  const quote = getTypeQuote(type.code);
+  const quote = type.quote;
   const typeByCode = new Map(genderTypes.map((item) => [item.code, item]));
 
   return (
@@ -251,13 +250,7 @@ function ShareCardLayout({
 
       <div style={{ height: 20 }} />
 
-      {quote ? (
-        <ShareCardQuote quote={quote} />
-      ) : (
-        <p className="max-w-[75%] font-serif-display text-[16px] italic leading-[1.55] text-[#1a1a1a]">
-          {type.tagline}
-        </p>
-      )}
+      <ShareCardQuote quote={quote} />
 
       <div style={{ height: 40 }} />
 

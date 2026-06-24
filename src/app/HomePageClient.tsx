@@ -48,9 +48,6 @@ export function HomePageClient() {
           >
             开始测试 →
           </Link>
-          <p className="mt-4 text-[13px] leading-6 text-muted">
-            48 题 · 无需注册 · 完成后查看全图鉴，也可能解锁隐藏图鉴
-          </p>
         </div>
       </section>
 

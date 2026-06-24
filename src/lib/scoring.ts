@@ -1,176 +1,243 @@
-import { questions } from "@/data/questions";
-
-export type Dimension = "TW" | "RD" | "GF" | "ML";
+export type Dimension = "S" | "R" | "D" | "C";
+export type ScoreDimension = "s" | "r" | "d" | "c";
+export type Tier = "U" | "D" | "X";
 
 export type Answer = {
   questionId: number;
   dimension: Dimension;
   value: number;
   reverse: boolean;
+  primaryWeight: number;
+  secondaryDimension?: Dimension;
+  secondaryWeight?: number;
+  tier: Tier;
 };
 
 export type Scores = {
+  s: number;
+  r: number;
+  d: number;
+  c: number;
+};
+
+type LegacyScores = {
   tw: number;
   rd: number;
   gf: number;
   ml: number;
 };
 
-type ScoreDimension = keyof Scores;
-
-export type ValidationIssue = "attention_failed" | "too_fast" | "all_same";
-
-export type ValidationResult = {
-  valid: boolean;
-  issues: ValidationIssue[];
+type DimensionTotals = {
+  actual: number;
+  min: number;
+  max: number;
 };
 
-type TimedAnswers = Answer[] & {
-  totalTimeSeconds?: number;
-  elapsedSeconds?: number;
-  startedAt?: number;
-  completedAt?: number;
+const scoreDimensions = ["s", "r", "d", "c"] as const satisfies ScoreDimension[];
+
+const scoreKeyByDimension: Record<Dimension, ScoreDimension> = {
+  S: "s",
+  R: "r",
+  D: "d",
+  C: "c",
 };
 
-const attentionAnswerValues = new Map<number, number>([
-  [20, 4],
-  [45, 3],
-]);
+const middleLetterByDimension: Record<ScoreDimension, string> = {
+  s: "m",
+  r: "m",
+  d: "m",
+  c: "m",
+};
 
-const attentionQuestionIds = new Set(
-  questions
-    .filter((question) => question.attentionCheck)
-    .map((question) => question.id),
-);
+const lowLetterByDimension: Record<ScoreDimension, string> = {
+  s: "s",
+  r: "r",
+  d: "d",
+  c: "c",
+};
+
+const highLetterByDimension: Record<ScoreDimension, string> = {
+  s: "S",
+  r: "R",
+  d: "D",
+  c: "C",
+};
 
 export function calculateScores(answers: Answer[]): Scores {
-  const totals: Record<Dimension, { sum: number; count: number }> = {
-    TW: { sum: 0, count: 0 },
-    RD: { sum: 0, count: 0 },
-    GF: { sum: 0, count: 0 },
-    ML: { sum: 0, count: 0 },
+  const totals: Record<ScoreDimension, DimensionTotals> = {
+    s: { actual: 0, min: 0, max: 0 },
+    r: { actual: 0, min: 0, max: 0 },
+    d: { actual: 0, min: 0, max: 0 },
+    c: { actual: 0, min: 0, max: 0 },
   };
 
   for (const answer of answers) {
-    if (attentionQuestionIds.has(answer.questionId)) {
-      continue;
-    }
-
     const value = normalizeAnswerValue(answer);
-    totals[answer.dimension].sum += value;
-    totals[answer.dimension].count += 1;
+    const tierDiscount = answer.tier === "U" ? 0.85 : 1;
+
+    addContribution(
+      totals[scoreKeyByDimension[answer.dimension]],
+      value,
+      answer.primaryWeight * tierDiscount,
+    );
+
+    if (answer.secondaryDimension && answer.secondaryWeight !== undefined) {
+      addContribution(
+        totals[scoreKeyByDimension[answer.secondaryDimension]],
+        value,
+        answer.secondaryWeight * tierDiscount,
+      );
+    }
   }
 
   return {
-    tw: calculateDimensionScore(totals.TW),
-    rd: calculateDimensionScore(totals.RD),
-    gf: calculateDimensionScore(totals.GF),
-    ml: calculateDimensionScore(totals.ML),
+    s: normalizeDimensionScore(totals.s),
+    r: normalizeDimensionScore(totals.r),
+    d: normalizeDimensionScore(totals.d),
+    c: normalizeDimensionScore(totals.c),
   };
 }
 
 export function getTypeCode(scores: Scores): string {
-  return [
-    getBandLetter(scores.tw, "T", "B", "W"),
-    getBandLetter(scores.rd, "R", "H", "D"),
-    getBandLetter(scores.gf, "G", "P", "F"),
-    getBandLetter(scores.ml, "M", "V", "L"),
-  ].join("");
+  const rawLetters = scoreDimensions.map((dimension) =>
+    getBandLetter(scores[dimension], dimension),
+  );
+  const middleDimensions = scoreDimensions.filter(
+    (_dimension, index) => rawLetters[index] === "m",
+  );
+
+  if (middleDimensions.length === 0) {
+    return rawLetters.join("");
+  }
+
+  if (middleDimensions.length === 1) {
+    return scoreDimensions
+      .map((dimension, index) =>
+        rawLetters[index] === "m"
+          ? getRoundedExtremeLetter(scores[dimension], dimension)
+          : rawLetters[index],
+      )
+      .join("");
+  }
+
+  return getHiddenTypeCodeFromMiddleDimensions(middleDimensions);
 }
 
 export function getResultTypeCode(scores: Scores): string {
-  const hiddenTypeCode = getHiddenTypeCodeFromMiddleDimensions(
-    getMiddleDimensionsFromScores(scores),
-  );
-
-  if (hiddenTypeCode) {
-    return hiddenTypeCode;
-  }
-
-  return [
-    getResultLetter(scores.tw, "T", "W"),
-    getResultLetter(scores.rd, "R", "D"),
-    getResultLetter(scores.gf, "G", "F"),
-    getResultLetter(scores.ml, "M", "L"),
-  ].join("");
+  return getTypeCode(scores);
 }
 
 export function getResultTypeCodeFromCode(typeCode: string): string {
-  const normalizedCode = typeCode.toUpperCase();
-  const hiddenAlias = getHiddenAliasCode(normalizedCode);
+  const hiddenAlias = getHiddenAliasCode(typeCode);
 
   if (hiddenAlias) {
     return hiddenAlias;
   }
 
-  const hiddenTypeCode = getHiddenTypeCodeFromMiddleDimensions(
-    getMiddleDimensionsFromCode(normalizedCode),
-  );
+  const middleDimensions = getMiddleDimensionsFromCode(typeCode);
 
-  if (hiddenTypeCode) {
-    return hiddenTypeCode;
+  if (middleDimensions.length >= 2) {
+    return getHiddenTypeCodeFromMiddleDimensions(middleDimensions);
   }
 
-  const [tw = "T", rd = "R", gf = "G", ml = "M"] = normalizedCode;
+  if (middleDimensions.length === 1) {
+    return scoreDimensions
+      .map((dimension, index) => {
+        const letter = typeCode[index];
 
-  return [
-    getCanonicalCodeLetter(tw, "T", "W"),
-    getCanonicalCodeLetter(rd, "R", "D"),
-    getCanonicalCodeLetter(gf, "G", "F"),
-    getCanonicalCodeLetter(ml, "M", "L"),
-  ].join("");
+        if (letter === "m") {
+          return lowLetterByDimension[dimension];
+        }
+
+        return isHighLetter(letter, dimension)
+          ? highLetterByDimension[dimension]
+          : lowLetterByDimension[dimension];
+      })
+      .join("");
+  }
+
+  return scoreDimensions
+    .map((dimension, index) =>
+      isHighLetter(typeCode[index], dimension)
+        ? highLetterByDimension[dimension]
+        : lowLetterByDimension[dimension],
+    )
+    .join("");
 }
 
-export function getTypeSymbols(scores: Scores): string {
-  return [scores.tw, scores.rd, scores.gf, scores.ml]
-    .map(getScoreSymbol)
-    .join(" ");
+export function getTypeSymbols(scores: Scores | LegacyScores): string {
+  if (isLegacyScores(scores)) {
+    return [scores.tw, scores.rd, scores.gf, scores.ml].map(getScoreSymbol).join(" ");
+  }
+
+  return scoreDimensions.map((dimension) => getScoreSymbol(scores[dimension])).join(" ");
 }
 
 export function getTypeSymbolsFromCode(typeCode: string): string {
-  const hiddenCode = getHiddenAliasCode(typeCode.toUpperCase());
+  const hiddenCode = getHiddenAliasCode(typeCode);
 
   if (hiddenCode) {
     return getHiddenTypeSymbols(hiddenCode);
   }
 
   return typeCode
-    .toUpperCase()
     .split("")
+    .slice(0, 4)
     .map(getCodeSymbol)
     .join(" ");
 }
 
 export function isMiddleScore(score: number): boolean {
-  return score > 38 && score < 62;
+  return score > 35 && score < 65;
 }
 
-function getMiddleDimensionsFromScores(scores: Scores): ScoreDimension[] {
-  return (["tw", "rd", "gf", "ml"] satisfies ScoreDimension[]).filter(
-    (dimension) => isMiddleScore(scores[dimension]),
-  );
+function addContribution(total: DimensionTotals, value: number, weight: number) {
+  total.actual += value * weight;
+  total.min += 1 * weight;
+  total.max += 5 * weight;
+}
+
+function normalizeAnswerValue(answer: Answer): number {
+  return answer.reverse ? 6 - answer.value : answer.value;
+}
+
+function normalizeDimensionScore(total: DimensionTotals): number {
+  if (total.max === total.min) {
+    return 0;
+  }
+
+  return ((total.actual - total.min) / (total.max - total.min)) * 100;
+}
+
+function getBandLetter(score: number, dimension: ScoreDimension): string {
+  if (score <= 35) {
+    return lowLetterByDimension[dimension];
+  }
+
+  if (score >= 65) {
+    return highLetterByDimension[dimension];
+  }
+
+  return middleLetterByDimension[dimension];
+}
+
+function getRoundedExtremeLetter(score: number, dimension: ScoreDimension): string {
+  return score < 50
+    ? lowLetterByDimension[dimension]
+    : highLetterByDimension[dimension];
 }
 
 function getMiddleDimensionsFromCode(typeCode: string): ScoreDimension[] {
-  const middleLetterByDimension: Record<ScoreDimension, string> = {
-    tw: "B",
-    rd: "H",
-    gf: "P",
-    ml: "V",
-  };
+  return scoreDimensions.filter((dimension, index) => {
+    const letter = typeCode[index];
 
-  return (["tw", "rd", "gf", "ml"] satisfies ScoreDimension[]).filter(
-    (dimension, index) => typeCode[index] === middleLetterByDimension[dimension],
-  );
+    return letter === middleLetterByDimension[dimension];
+  });
 }
 
 function getHiddenTypeCodeFromMiddleDimensions(
   middleDimensions: ScoreDimension[],
-): string | null {
-  if (middleDimensions.length < 2) {
-    return null;
-  }
-
+): string {
   if (middleDimensions.length === 4) {
     return "HIDDEN_DRIFT";
   }
@@ -181,11 +248,11 @@ function getHiddenTypeCodeFromMiddleDimensions(
 
   const middleDimensionKey = middleDimensions.join(",");
 
-  if (middleDimensionKey === "tw,rd") {
+  if (middleDimensionKey === "s,r") {
     return "HIDDEN_SMOKE";
   }
 
-  if (middleDimensionKey === "gf,ml") {
+  if (middleDimensionKey === "d,c") {
     return "HIDDEN_DEW";
   }
 
@@ -208,7 +275,7 @@ function getHiddenAliasCode(typeCode: string): string | null {
     HIDDEN_RIDGE: "HIDDEN_RIDGE",
   };
 
-  return hiddenAliasByCode[typeCode] ?? null;
+  return hiddenAliasByCode[typeCode.toUpperCase()] ?? null;
 }
 
 function getHiddenTypeSymbols(typeCode: string): string {
@@ -223,145 +290,37 @@ function getHiddenTypeSymbols(typeCode: string): string {
   return symbolsByTypeCode[typeCode] ?? "◐ ◐ ◐ ◐";
 }
 
-export function validateAnswers(answers: Answer[]): ValidationResult {
-  const issues: ValidationIssue[] = [];
-
-  if (hasFailedAttentionCheck(answers)) {
-    issues.push("attention_failed");
-  }
-
-  if (isTooFast(answers)) {
-    issues.push("too_fast");
-  }
-
-  if (hasAllSameAnswers(answers)) {
-    issues.push("all_same");
-  }
-
-  return {
-    valid: issues.length === 0,
-    issues,
-  };
-}
-
-function normalizeAnswerValue(answer: Answer): number {
-  return answer.reverse ? 6 - answer.value : answer.value;
-}
-
-function calculateDimensionScore(total: { sum: number; count: number }): number {
-  if (total.count === 0) {
-    return 0;
-  }
-
-  return ((total.sum - total.count) / (total.count * 4)) * 100;
-}
-
-function getBandLetter(
-  score: number,
-  lowLetter: string,
-  middleLetter: string,
-  highLetter: string,
-): string {
-  if (score <= 38) {
-    return lowLetter;
-  }
-
-  if (score >= 62) {
-    return highLetter;
-  }
-
-  return middleLetter;
-}
-
-function getResultLetter(
-  score: number,
-  lowLetter: string,
-  highLetter: string,
-): string {
-  return score <= 50 ? lowLetter : highLetter;
-}
-
-function getCanonicalCodeLetter(
-  letter: string,
-  lowLetter: string,
-  highLetter: string,
-): string {
-  if (letter === highLetter) {
-    return highLetter;
-  }
-
-  return lowLetter;
-}
-
 function getScoreSymbol(score: number): string {
-  if (score <= 38) {
+  if (score <= 35) {
     return "●";
   }
 
-  if (score >= 62) {
+  if (score >= 65) {
     return "◯";
   }
 
   return "◐";
+}
+
+function isLegacyScores(scores: Scores | LegacyScores): scores is LegacyScores {
+  return "tw" in scores;
 }
 
 function getCodeSymbol(letter: string): string {
-  if (["T", "R", "G", "M"].includes(letter)) {
+  if (["s", "r", "d", "c"].includes(letter)) {
     return "●";
   }
 
-  if (["W", "D", "F", "L"].includes(letter)) {
+  if (["S", "R", "D", "C"].includes(letter)) {
     return "◯";
   }
 
   return "◐";
 }
 
-function hasFailedAttentionCheck(answers: Answer[]): boolean {
-  const answerByQuestionId = new Map(
-    answers.map((answer) => [answer.questionId, answer.value]),
-  );
-
-  for (const [questionId, expectedValue] of attentionAnswerValues) {
-    if (answerByQuestionId.get(questionId) !== expectedValue) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function isTooFast(answers: Answer[]): boolean {
-  const totalTimeSeconds = getTotalTimeSeconds(answers);
-
-  return totalTimeSeconds !== undefined && totalTimeSeconds < 90;
-}
-
-function getTotalTimeSeconds(answers: Answer[]): number | undefined {
-  const timedAnswers = answers as TimedAnswers;
-
-  if (typeof timedAnswers.totalTimeSeconds === "number") {
-    return timedAnswers.totalTimeSeconds;
-  }
-
-  if (typeof timedAnswers.elapsedSeconds === "number") {
-    return timedAnswers.elapsedSeconds;
-  }
-
-  if (
-    typeof timedAnswers.startedAt === "number" &&
-    typeof timedAnswers.completedAt === "number"
-  ) {
-    return (timedAnswers.completedAt - timedAnswers.startedAt) / 1000;
-  }
-
-  return undefined;
-}
-
-function hasAllSameAnswers(answers: Answer[]): boolean {
-  if (answers.length < 2) {
-    return false;
-  }
-
-  return answers.every((answer) => answer.value === answers[0].value);
+function isHighLetter(
+  letter: string | undefined,
+  dimension: ScoreDimension,
+): boolean {
+  return letter === highLetterByDimension[dimension];
 }

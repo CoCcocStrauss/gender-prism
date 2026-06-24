@@ -1,40 +1,21 @@
 "use client";
 
-import { questions } from "@/data/questions";
+import { likertOptions, orderedQuestions } from "@/data/questions";
 import {
   type Answer,
   calculateScores,
-  getResultTypeCode,
   getTypeCode,
 } from "@/lib/scoring";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Step = "intro" | "test" | "complete";
-
-type BasicInfo = {
-  age?: string;
-  genderIdentity?: string;
-};
+type Step = "instruction" | "test" | "complete";
 
 type TimedAnswer = Answer & {
   answeredAt: number;
   timeSpentMs: number;
 };
-
-const ageOptions = ["18以下", "18-24", "25-34", "35-44", "45+"];
-
-const genderIdentityOptions = [
-  "男性",
-  "女性",
-  "非二元",
-  "性别流动",
-  "其他",
-  "不想回答",
-];
-
-const storageKey = "gender-prism:result";
 
 export default function TestPage() {
   const router = useRouter();
@@ -42,15 +23,13 @@ export default function TestPage() {
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasFinishedRef = useRef(false);
   const hasNavigatedRef = useRef(false);
-  const [step, setStep] = useState<Step>("intro");
-  const [basicInfo, setBasicInfo] = useState<BasicInfo>({});
+  const [step, setStep] = useState<Step>("instruction");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, TimedAnswer>>({});
   const [questionStartedAt, setQuestionStartedAt] = useState(() => Date.now());
-  const [testStartedAt, setTestStartedAt] = useState<number | null>(null);
   const [resultCode, setResultCode] = useState<string | null>(null);
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = orderedQuestions[currentIndex];
   const currentAnswer = answers[currentQuestion.id];
   const answeredQuestions = Object.keys(answers).length;
 
@@ -66,14 +45,13 @@ export default function TestPage() {
 
     clearAutoAdvanceTimer();
     setStep("test");
-    setTestStartedAt(now);
     setQuestionStartedAt(now);
   }, [clearAutoAdvanceTimer]);
 
   const goToQuestion = useCallback(
     (index: number) => {
       clearAutoAdvanceTimer();
-      setCurrentIndex(Math.min(Math.max(index, 0), questions.length - 1));
+      setCurrentIndex(Math.min(Math.max(index, 0), orderedQuestions.length - 1));
       setQuestionStartedAt(Date.now());
     },
     [clearAutoAdvanceTimer],
@@ -87,21 +65,33 @@ export default function TestPage() {
       }
 
       hasFinishedRef.current = true;
-      const completedAt = Date.now();
-      const orderedAnswers = questions
+      const orderedAnswers = orderedQuestions
         .map((question) => nextAnswers[question.id])
         .filter((answer): answer is TimedAnswer => Boolean(answer));
       const scoringAnswers: Answer[] = orderedAnswers.map(
-        ({ questionId, dimension, value, reverse }) => ({
+        ({
           questionId,
           dimension,
           value,
           reverse,
+          primaryWeight,
+          secondaryDimension,
+          secondaryWeight,
+          tier,
+        }) => ({
+          questionId,
+          dimension,
+          value,
+          reverse,
+          primaryWeight,
+          secondaryDimension,
+          secondaryWeight,
+          tier,
         }),
       );
       const scores = calculateScores(scoringAnswers);
       const code = getTypeCode(scores);
-      const resultCode = getResultTypeCode(scores);
+      const resultCode = code;
 
       console.log("[GenderPrism:test] finishTest calculated", {
         code,
@@ -113,25 +103,9 @@ export default function TestPage() {
       if (typeof window !== "undefined") {
         try {
           window.sessionStorage.setItem("prismScores", JSON.stringify(scores));
-          window.sessionStorage.setItem(
-            storageKey,
-            JSON.stringify({
-              code,
-              resultCode,
-              scores,
-              basicInfo,
-              answers: orderedAnswers,
-              startedAt: testStartedAt,
-              completedAt,
-              totalTimeSeconds:
-                testStartedAt === null
-                  ? undefined
-                  : (completedAt - testStartedAt) / 1000,
-            }),
-          );
           console.log("[GenderPrism:test] sessionStorage written", {
             resultCode,
-            storageKey,
+            scores,
           });
         } catch (error) {
           console.error("[GenderPrism:test] sessionStorage write failed", error);
@@ -144,7 +118,7 @@ export default function TestPage() {
       setStep("complete");
       console.log("[GenderPrism:test] complete state set", { resultCode });
     },
-    [basicInfo, testStartedAt],
+    [],
   );
 
   const selectAnswer = useCallback(
@@ -157,6 +131,10 @@ export default function TestPage() {
         dimension: currentQuestion.dimension,
         value,
         reverse: currentQuestion.reverse,
+        primaryWeight: currentQuestion.primaryWeight,
+        secondaryDimension: currentQuestion.secondaryDimension,
+        secondaryWeight: currentQuestion.secondaryWeight,
+        tier: currentQuestion.tier,
         answeredAt: now,
         timeSpentMs: Math.max(now - questionStartedAt, 0),
       };
@@ -168,7 +146,7 @@ export default function TestPage() {
       setAnswers(nextAnswers);
 
       autoAdvanceTimer.current = setTimeout(() => {
-        if (currentIndex === questions.length - 1) {
+        if (currentIndex === orderedQuestions.length - 1) {
           finishTest(nextAnswers);
           return;
         }
@@ -230,59 +208,64 @@ export default function TestPage() {
 
   useEffect(() => clearAutoAdvanceTimer, [clearAutoAdvanceTimer]);
 
-  if (step === "intro") {
+  if (step === "instruction") {
     return (
       <motion.main
         initial={shouldReduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="min-h-screen bg-background px-6 text-foreground"
+        className="min-h-screen bg-[#FAFAF8] px-6 text-foreground"
       >
-        <section className="mx-auto flex min-h-screen max-w-[680px] flex-col justify-center py-24">
-          <div>
-            <p className="font-serif-display text-xl italic leading-none">
-              Before we begin...
+        <section className="mx-auto max-w-[640px] pb-14 pt-12 sm:pb-[60px] sm:pt-[60px]">
+          <p className="font-serif-display text-[20px] italic leading-none sm:text-[24px]">
+            Before You Begin
+          </p>
+
+          <div className="mt-8 space-y-6 text-[15px] leading-[1.8] text-[#1a1a1a] sm:text-base">
+            <p>
+              这不是一个测试你「是男是女」或者「有多男性化多女性化」的工具。
             </p>
-
-            <div className="mt-14 space-y-12">
-              <OptionGroup
-                label="年龄段"
-                options={ageOptions}
-                value={basicInfo.age}
-                onChange={(value) =>
-                  setBasicInfo((info) => ({ ...info, age: value }))
-                }
-              />
-              <OptionGroup
-                label="性别认同"
-                options={genderIdentityOptions}
-                value={basicInfo.genderIdentity}
-                onChange={(value) =>
-                  setBasicInfo((info) => ({ ...info, genderIdentity: value }))
-                }
-              />
-            </div>
-
-            <p className="mt-12 text-[13px] leading-6 text-muted">
-              这些信息仅用于匿名统计，不影响结果，全部可跳过。
+            <p>
+              性别是人类社会最古老的分类系统之一。从你出生的那一刻起，这个系统就已经在运作了——它影响你如何被对待、如何被期待、如何理解自己和他人。
             </p>
+            <p>
+              我们关心的不是这个系统给你贴了什么标签。我们关心的是你和这个系统之间的互动方式。
+            </p>
+            <p>
+              比如：当一个陌生人走进房间时，你会在多快的时间内注意到他们的性别？你是否曾经意识到自己的某个习惯其实来自性别规范？你的存在是让周围的性别氛围变得更浓，还是更淡？你在不同的场合里，是同一个你吗？
+            </p>
+            <p>
+              这些问题没有正确答案。每种互动模式都有它的逻辑和来源。我们不会告诉你哪种模式更好或更进步。
+            </p>
+          </div>
 
-            <div className="mt-10 flex items-center gap-6">
-              <button
-                type="button"
-                onClick={startTest}
-                className="inline-flex min-h-11 items-center text-sm text-foreground underline-offset-4 transition-colors duration-200 hover:text-muted hover:underline"
-              >
-                跳过
-              </button>
-              <button
-                type="button"
-                onClick={startTest}
-                className="rounded-lg bg-accent px-8 py-4 text-sm font-medium leading-none text-background transition-opacity duration-200 hover:opacity-85"
-              >
-                继续 →
-              </button>
+          <div className="mt-10 h-px w-full bg-border sm:mt-12" />
+
+          <section className="mt-6">
+            <h2 className="text-sm font-normal tracking-widest text-[#8a8a8a]">
+              HOW IT WORKS
+            </h2>
+            <div className="mt-4 space-y-4 text-[15px] leading-[1.8] text-[#1a1a1a] sm:text-base">
+              <p>接下来你将回答 72 道题目。每道题使用 1-5 分量表：</p>
+              <p>1 = 完全不符合&nbsp;&nbsp;&nbsp;&nbsp;5 = 完全符合</p>
+              <p>
+                请尽量按照第一直觉回答。如果实在不确定，可以选 3（中立），但尽量少选——你的倾向比你以为的更清晰。
+              </p>
+              <p>测试大约需要 10 分钟。</p>
             </div>
+          </section>
+
+          <div className="mt-10 sm:mt-12">
+            <button
+              type="button"
+              onClick={startTest}
+              className="min-h-11 w-full rounded-lg bg-accent px-8 py-4 text-sm font-medium leading-none text-background transition-opacity duration-200 hover:opacity-85 sm:w-auto"
+            >
+              开始测试 →
+            </button>
+            <p className="mt-4 text-[13px] leading-6 text-[#8a8a8a]">
+              结果是一张快照——下次做，你的颜色可能不同。
+            </p>
           </div>
         </section>
       </motion.main>
@@ -317,7 +300,7 @@ export default function TestPage() {
       <header className="sticky inset-x-0 top-0 z-10 bg-background/95 px-6">
         <div className="mx-auto flex max-w-[680px] items-center justify-between py-6 text-[13px] leading-6 text-muted">
           <span>
-            {currentIndex + 1} / {questions.length}
+            {currentIndex + 1} / {orderedQuestions.length}
           </span>
           <button
             type="button"
@@ -352,7 +335,7 @@ export default function TestPage() {
             <QuestionPrompt text={currentQuestion.text} />
 
             <div className="mx-auto mt-10 max-w-lg space-y-3">
-              {currentQuestion.options.map((option) => {
+              {likertOptions.map((option) => {
                 const selected = currentAnswer?.value === option.value;
 
                 return (
@@ -376,10 +359,11 @@ export default function TestPage() {
               })}
             </div>
 
-            <p className="mt-12 text-center text-[13px] leading-6 text-muted">
-              可按 1-5 选择
-              {answeredQuestions > 0 ? ` · 已回答 ${answeredQuestions} 题` : ""}
-            </p>
+            {answeredQuestions > 0 ? (
+              <p className="mt-12 text-center text-[13px] leading-6 text-muted">
+                已回答 {answeredQuestions} 题
+              </p>
+            ) : null}
           </motion.div>
         </AnimatePresence>
       </section>
@@ -421,40 +405,3 @@ function formatQuestionPrompt(
   };
 }
 
-function OptionGroup({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  value?: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div>
-      <p className="mb-4 text-sm font-normal text-foreground">{label}</p>
-      <div className="flex flex-wrap gap-2">
-        {options.map((option) => {
-          const selected = value === option;
-
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onChange(option)}
-              className={`min-h-11 rounded-full border border-border px-4 text-sm leading-none transition-opacity duration-200 hover:opacity-85 ${
-                selected
-                  ? "border-accent bg-accent text-background"
-                  : "text-foreground"
-              }`}
-            >
-              {option}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}

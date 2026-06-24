@@ -1,19 +1,12 @@
 "use client";
 
-import type { GenderType } from "@/data/types";
 import {
   formatTypeQuoteForCopy,
-  getTypeQuote,
+  type GenderType,
   type TypeQuote,
-} from "@/data/typeQuotes";
-import {
-  DIMENSION_GRADIENTS,
-  type PrismDimension,
-  type PrismScores,
-  getDimensionColor,
-  getPersonalPrismColor,
-} from "@/lib/prismColor";
-import { getTypeSymbols, getTypeSymbolsFromCode, isMiddleScore } from "@/lib/scoring";
+} from "@/data/types";
+import type { PrismScores } from "@/lib/prismColor";
+import { type ScoreDimension, type Scores } from "@/lib/scoring";
 import { ShareCard, useShareCard } from "@/components/ShareCard";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
@@ -31,27 +24,46 @@ type ResultPageClientProps = {
   resultCode: string;
 };
 
-type SectionKey = "system" | "dialogues" | "theory";
+type SectionKey = "system" | "dialogues";
 
 const coordinateMeta: {
-  dimension: PrismDimension;
-  name: string;
+  dimension: ScoreDimension;
   left: string;
   right: string;
+  explanation: string;
 }[] = [
-  { dimension: "tw", name: "关系取向", left: "独行 T", right: "W 织网" },
-  { dimension: "rd", name: "规范张力", left: "共鸣 R", right: "D 异响" },
-  { dimension: "gf", name: "性别显著性", left: "底色 G", right: "F 前景" },
-  { dimension: "ml", name: "表达一致性", left: "棱镜 M", right: "L 激光" },
+  {
+    dimension: "s",
+    left: "s",
+    right: "S",
+    explanation: "你的认知在多大程度上自动地使用性别作为理解世界的框架。",
+  },
+  {
+    dimension: "r",
+    left: "r",
+    right: "R",
+    explanation: "你在多大程度上意识到性别系统在你身上和你周围的运作方式。",
+  },
+  {
+    dimension: "d",
+    left: "d",
+    right: "D",
+    explanation: "你的存在和行为倾向于在互动中让性别变得更显著，还是更不显著。",
+  },
+  {
+    dimension: "c",
+    left: "c",
+    right: "C",
+    explanation: "你的性别表达在不同的社会场合中呈现出多大程度的一致性。",
+  },
 ];
 
 export function ResultPageClient({
   type,
   allTypes,
-  resultCode,
 }: ResultPageClientProps) {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const [scores, setScores] = useState<PrismScores | null>(null);
+  const [scores, setScores] = useState<Scores | null>(null);
   const [openSection, setOpenSection] = useState<SectionKey | null>(null);
   const [copied, setCopied] = useState<"tagline" | "link" | null>(null);
   const [sharePreviewUrl, setSharePreviewUrl] = useState<string | null>(null);
@@ -86,16 +98,12 @@ export function ResultPageClient({
     () => scores ?? getDefaultScoresFromCode(type.code),
     [scores, type.code],
   );
-  const symbols = scores ? getTypeSymbols(scores) : getTypeSymbolsFromCode(resultCode);
-  const prismColor = scores ? getPersonalPrismColor(scores) : type.hex;
+  const prismColor = type.hex;
   const circleNeedsBorder = isLowContrastOnPaper(prismColor);
-  const quote = getTypeQuote(type.code);
-  const copyQuoteText = quote ? formatTypeQuoteForCopy(quote) : type.tagline;
-  const middleDimensions = scores
-    ? coordinateMeta.filter((item) => isMiddleScore(scores[item.dimension]))
-    : [];
-  const singleMiddleDimension =
-    middleDimensions.length === 1 ? middleDimensions[0] : null;
+  const quote = type.quote;
+  const copyQuoteText = formatTypeQuoteForCopy(quote);
+  const srCouplingText = scores ? getSrCouplingText(scores) : null;
+  const shareScores = scores ? toShareCardScores(scores) : null;
   const dialogueTypeByCode = useMemo(
     () => new Map(allTypes.map((item) => [item.code, item])),
     [allTypes],
@@ -182,13 +190,6 @@ export function ResultPageClient({
           <p className="mt-2 font-serif-display text-base italic leading-none text-muted">
             {type.nameEn}
           </p>
-          <p className="mt-3 text-base tracking-[0.3em] text-muted">{symbols}</p>
-          {singleMiddleDimension ? (
-            <p className="mx-auto mt-4 max-w-[420px] text-[13px] leading-6 text-muted">
-              你在{singleMiddleDimension.name}
-              上接近中间地带，这个结果未必能完全概括你。
-            </p>
-          ) : null}
         </motion.div>
       </section>
 
@@ -210,14 +211,25 @@ export function ResultPageClient({
             {coordinateMeta.map((item) => (
               <CoordinateLine
                 key={item.dimension}
-                dimension={item.dimension}
                 score={displayedScores[item.dimension]}
                 left={item.left}
                 right={item.right}
+                explanation={item.explanation}
               />
             ))}
           </div>
         </section>
+
+        {srCouplingText ? (
+          <section className="pb-12">
+            <h2 className="text-xs font-normal tracking-widest text-[#aaaaaa]">
+              S-R COUPLING
+            </h2>
+            <p className="mt-3 text-[13px] leading-[1.6] text-[#8a8a8a]">
+              {srCouplingText}
+            </p>
+          </section>
+        ) : null}
 
         <section className="pb-12">
           {splitPortrait(type.portrait).map((paragraph) => (
@@ -232,11 +244,7 @@ export function ResultPageClient({
 
         <section className="border-t border-border pb-12 pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            {quote ? <TypeQuoteBlock quote={quote} /> : (
-              <p className="font-serif-display text-lg italic leading-[1.7] text-foreground">
-                {type.tagline}
-              </p>
-            )}
+            <TypeQuoteBlock quote={quote} />
             <button
               type="button"
               onClick={() => copyText(copyQuoteText, "tagline")}
@@ -291,17 +299,6 @@ export function ResultPageClient({
               })}
             </div>
           </AccordionItem>
-
-          <AccordionItem
-            title="理论注脚"
-            open={openSection === "theory"}
-            onToggle={() =>
-              setOpenSection((section) => (section === "theory" ? null : "theory"))
-            }
-            shouldReduceMotion={shouldReduceMotion}
-          >
-            <p>{type.theoryNote}</p>
-          </AccordionItem>
         </section>
 
         <section className="border-t border-border pb-12 pt-6">
@@ -313,12 +310,6 @@ export function ResultPageClient({
             >
               保存棱镜卡
             </button>
-            <Link
-              href="/gallery"
-              className="rounded-lg border border-foreground px-7 py-3.5 text-center text-sm font-medium leading-none text-foreground transition-opacity duration-200 hover:opacity-85"
-            >
-              查看全部类型
-            </Link>
           </div>
           <button
             type="button"
@@ -342,7 +333,7 @@ export function ResultPageClient({
         </footer>
       </motion.div>
       <div ref={shareCardRef}>
-        <ShareCard type={type} scores={scores} />
+        <ShareCard type={type} scores={shareScores} />
       </div>
       {sharePreviewUrl ? (
         <ShareCardPreviewOverlay
@@ -420,22 +411,20 @@ function TypeQuoteBlock({ quote }: { quote: TypeQuote }) {
 }
 
 function CoordinateLine({
-  dimension,
   score,
   left,
   right,
+  explanation,
 }: {
-  dimension: PrismDimension;
   score: number;
   left: string;
   right: string;
+  explanation: string;
 }) {
-  const gradient = DIMENSION_GRADIENTS[dimension];
   const position = clampScore(score);
-  const note = getCoordinateNote(dimension);
 
   return (
-    <div className="grid grid-cols-2 gap-x-4 sm:grid-cols-[72px_1fr_72px]">
+    <div className="grid grid-cols-2 gap-x-4 sm:grid-cols-[52px_1fr_52px_56px]">
       <span className="self-center text-sm leading-6 text-muted">{left}</span>
       <span className="self-center text-right text-sm leading-6 text-muted sm:col-start-3">
         {right}
@@ -445,7 +434,7 @@ function CoordinateLine({
           className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2"
           style={{
             height: "2px",
-            background: `linear-gradient(90deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+            background: "linear-gradient(90deg, #e8e8e4 0%, #8a8a8a 100%)",
           }}
         />
         <span
@@ -453,12 +442,15 @@ function CoordinateLine({
           className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{
             left: `${position}%`,
-            backgroundColor: getDimensionColor(dimension, position),
+            backgroundColor: "#1a1a1a",
           }}
         />
       </div>
-      <p className="col-span-2 mt-2 text-[13px] leading-[1.4] text-[#aaaaaa] sm:col-span-1 sm:col-start-2">
-        {note.explanation}
+      <span className="col-span-2 text-right text-[13px] leading-6 text-[#8a8a8a] sm:col-span-1 sm:col-start-4 sm:row-start-1 sm:self-center">
+        {Math.round(position)}/100
+      </span>
+      <p className="col-span-2 mt-2 text-[13px] leading-[1.4] text-[#aaaaaa] sm:col-span-2 sm:col-start-2">
+        {explanation}
       </p>
     </div>
   );
@@ -517,25 +509,25 @@ function AccordionItem({
   );
 }
 
-function parseStoredScores(value: string | null): PrismScores | null {
+function parseStoredScores(value: string | null): Scores | null {
   if (!value) {
     return null;
   }
 
   try {
-    const parsed = JSON.parse(value) as Partial<PrismScores>;
+    const parsed = JSON.parse(value) as Partial<Scores>;
 
     if (
-      typeof parsed.tw === "number" &&
-      typeof parsed.rd === "number" &&
-      typeof parsed.gf === "number" &&
-      typeof parsed.ml === "number"
+      typeof parsed.s === "number" &&
+      typeof parsed.r === "number" &&
+      typeof parsed.d === "number" &&
+      typeof parsed.c === "number"
     ) {
       return {
-        tw: clampScore(parsed.tw),
-        rd: clampScore(parsed.rd),
-        gf: clampScore(parsed.gf),
-        ml: clampScore(parsed.ml),
+        s: clampScore(parsed.s),
+        r: clampScore(parsed.r),
+        d: clampScore(parsed.d),
+        c: clampScore(parsed.c),
       };
     }
   } catch {
@@ -545,12 +537,12 @@ function parseStoredScores(value: string | null): PrismScores | null {
   return null;
 }
 
-function getDefaultScoresFromCode(code: string): PrismScores {
+function getDefaultScoresFromCode(code: string): Scores {
   return {
-    tw: getDefaultPosition(code[0], "T", "W"),
-    rd: getDefaultPosition(code[1], "R", "D"),
-    gf: getDefaultPosition(code[2], "G", "F"),
-    ml: getDefaultPosition(code[3], "M", "L"),
+    s: getDefaultPosition(code[0], "s", "S"),
+    r: getDefaultPosition(code[1], "r", "R"),
+    d: getDefaultPosition(code[2], "d", "D"),
+    c: getDefaultPosition(code[3], "c", "C"),
   };
 }
 
@@ -566,26 +558,33 @@ function getDefaultPosition(letter: string | undefined, low: string, high: strin
   return 50;
 }
 
-function getCoordinateNote(dimension: PrismDimension): { explanation: string } {
-  const notes: Record<PrismDimension, { explanation: string }> = {
-    tw: {
-      explanation:
-        "这条线测量你的关系取向——你倾向于独立行动，还是在关系中寻求共振。",
-    },
-    rd: {
-      explanation:
-        "这条线测量你与社会性别规范之间的张力——和谐，还是摩擦。",
-    },
-    gf: {
-      explanation:
-        "这条线测量性别在你生活中的显著程度——它是背景，还是前景。",
-    },
-    ml: {
-      explanation: "这条线测量你的性别表达在不同场合中的变化幅度。",
-    },
+function toShareCardScores(scores: Scores): PrismScores {
+  return {
+    tw: scores.s,
+    rd: scores.r,
+    gf: scores.d,
+    ml: scores.c,
   };
+}
 
-  return notes[dimension];
+function getSrCouplingText(scores: Scores): string | null {
+  if (scores.s > 60 && scores.r > 60) {
+    return "你对性别的感知和你的反思是正向耦合的——你很自然地按性别来理解世界，同时你也清楚地意识到自己在这样做。这种双重状态意味着你对性别的处理既深入又自觉。";
+  }
+
+  if (scores.s > 60 && scores.r < 40) {
+    return "你对性别的感知强烈，但你对此很少反思——性别对你来说更接近一种自然事实，而非需要被分析的东西。你按性别组织世界的方式运行得很流畅，不产生摩擦。";
+  }
+
+  if (scores.s < 40 && scores.r > 60) {
+    return "你不太自然地按性别来分类世界，但你对性别系统有很高的意识——你的性别认知更多来自学习和经历，而非本能。你的'看到'性别更多是因为你训练自己去看。";
+  }
+
+  if (scores.s < 40 && scores.r < 40) {
+    return "性别在你的感知中既不突出也不被分析——它在你生活中的存在感很低。你和性别系统之间的摩擦小到你不太需要去注意它。";
+  }
+
+  return null;
 }
 
 function splitPortrait(portrait: string): string[] {
