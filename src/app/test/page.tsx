@@ -103,15 +103,17 @@ export default function TestPage() {
       if (typeof window !== "undefined") {
         try {
           window.sessionStorage.setItem("prismScores", JSON.stringify(scores));
-          console.log("[GenderPrism:test] sessionStorage written", {
+          window.localStorage.setItem("myType", resultCode);
+          window.localStorage.setItem("myScores", JSON.stringify(scores));
+          console.log("[GenderPrism:test] storage written", {
             resultCode,
             scores,
           });
         } catch (error) {
-          console.error("[GenderPrism:test] sessionStorage write failed", error);
+          console.error("[GenderPrism:test] storage write failed", error);
         }
       } else {
-        console.log("[GenderPrism:test] sessionStorage skipped: no window");
+        console.log("[GenderPrism:test] storage skipped: no window");
       }
 
       setResultCode(resultCode);
@@ -186,8 +188,15 @@ export default function TestPage() {
       return;
     }
 
-    const target = `/result/${resultCode}`;
-    console.log("[GenderPrism:test] scheduling result navigation", { target });
+    const pendingFriend = window.sessionStorage.getItem("pendingFriend");
+    let target = `/result/${resultCode}`;
+
+    if (pendingFriend) {
+      target = `/compare?me=${encodeURIComponent(resultCode)}&friend=${encodeURIComponent(pendingFriend)}`;
+      window.sessionStorage.removeItem("pendingFriend");
+    }
+
+    console.log("[GenderPrism:test] scheduling navigation", { target });
 
     const timer = setTimeout(() => {
       if (hasNavigatedRef.current) {

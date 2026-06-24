@@ -265,6 +265,15 @@ export function ResultPageClient({
               </button>
             </div>
 
+            <div className="mt-4 text-center">
+              <Link
+                href="/collection"
+                className="text-[14px] text-[#8a8a8a] underline-offset-4 transition-colors duration-200 hover:text-[#1a1a1a] hover:underline"
+              >
+                我的棱镜集 →
+              </Link>
+            </div>
+
             <footer className="mt-5 text-center">
               <p className="mx-auto max-w-[520px] text-[13px] leading-[1.7] text-muted">
                 本测试为自我探索工具。你的颜色会随着生活经历而微妙变化，这完全正常。
@@ -299,7 +308,7 @@ export function ResultPageClient({
         </div>
       </motion.div>
       <div ref={shareCardRef}>
-        <ShareCard type={type} scores={displayedScores} />
+        <ShareCard type={type} scores={displayedScores} inviteCode={resultCode} />
       </div>
       {sharePreviewUrl ? (
         <ShareCardPreviewOverlay

@@ -9,6 +9,7 @@ import type { RefObject } from "react";
 type ShareCardProps = {
   type: GenderType;
   scores?: Scores | null;
+  inviteCode: string;
   hidden?: boolean;
 };
 
@@ -44,16 +45,16 @@ const coordinateMeta: {
   },
 ];
 
-const qrCodeUrl = "https://gender-prism.vercel.app/";
+const qrCodeBaseUrl = "https://genderprism.xyz/invite";
 
-export function ShareCard({ type, scores, hidden = true }: ShareCardProps) {
+export function ShareCard({ type, scores, inviteCode, hidden = true }: ShareCardProps) {
   return (
     <div
       aria-hidden={hidden}
       data-share-card-root
       className={hidden ? "pointer-events-none absolute left-[-9999px] top-0" : ""}
     >
-      <ShareCardLayout type={type} scores={scores} />
+      <ShareCardLayout type={type} scores={scores} inviteCode={inviteCode} />
     </div>
   );
 }
@@ -109,13 +110,16 @@ export function useShareCard(
 function ShareCardLayout({
   type,
   scores,
+  inviteCode,
 }: {
   type: GenderType;
   scores?: Scores | null;
+  inviteCode: string;
 }) {
   const prismColor = type.hex;
   const displayedScores = scores ?? getDefaultScoresFromCode(type.code);
   const quote = type.quote;
+  const qrCodeUrl = `${qrCodeBaseUrl}/${inviteCode}`;
 
   return (
     <article
